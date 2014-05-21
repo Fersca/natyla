@@ -426,15 +426,17 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 func createElement(col string, id string, valor string, saveToDisk bool, deleted bool) (string,error) {
 
 	//create the list element
-        var elemento *list.Element
+	var elemento *list.Element
 	b := []byte(valor)
 
 	if deleted==false {
 
 		//Create the Json element
+		d := json.NewDecoder(strings.NewReader(valor))
+		d.UseNumber()
 		var f interface{}
-		err := json.Unmarshal(b, &f)
-
+		err := d.Decode(&f)
+		
 		if err != nil {
 			return "",err
 		}
@@ -470,8 +472,8 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 
 		fmt.Println("Creating node as deleted: ",col,id)
 		//create the node as deleted
-                var n node
-                n.V = nil
+		var n node
+		n.V = nil
 		n.Deleted = true
 		n.col = col
 		n.key = id
@@ -598,7 +600,7 @@ func getElement(col string, id string) ([]byte, error) {
 		return nil, nil
 	}
 
-	//Move the element to the front of the LRU-List using a goru
+	//Move the element to the front of the LRU-List using a gorutine
 	go moveFront(elemento)
 
 	//Verifica si esta swapeado
