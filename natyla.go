@@ -89,7 +89,7 @@ func init(){
 	//set max memory form config
 	maxMemBytes, _ := config["memory"].(json.Number).Int64()
 	
-	fmt.Println("Max memory defined as: ",maxMemBytes," bytes")
+	fmt.Println("Max memory defined as: ",maxMemBytes/1024/1024," Mbytes")
 	runtime.GOMAXPROCS(coreNum)
 
 	//Create a new doble-linked list to act as LRU
@@ -133,7 +133,7 @@ func readConfig() {
 		fmt.Println("Can't found 'config.json' using default parameters")
 		config = make(map[string]interface{})
 		config["token"] = "adminToken"
-		var maxMemdefault json.Number = json.Number("1048576")
+		var maxMemdefault json.Number = json.Number("10485760")
 		config["memory"] = maxMemdefault
 		
 	} else {
