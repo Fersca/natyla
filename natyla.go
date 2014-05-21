@@ -32,10 +32,10 @@ import (
 var lista *list.List
 
 //Max byte in memory (Key + Data), today set to 100KB
-const maxMemBytes int64 = 1048576
+var maxMemBytes int64
 var memBytes int64 = 0
-var sequence int = 0
-const pointerLen int = 4+8 //Bytes of pointer in 32bits machines plus int64 for the key of element in hashmemBytes
+
+//const pointerLen int = 4+8 //Bytes of pointer in 32bits machines plus int64 for the key of element in hashmemBytes
 const cacheNotFound bool = true
 
 //Channes to sync the List, map
@@ -69,6 +69,7 @@ type collectionChannel struct {
 
 //Create the map that stores the list of collections
 var collections map[string]collectionChannel
+var config map[string]interface{}
 
 /*
  * Init the system variables
@@ -81,6 +82,13 @@ func init(){
 	//Set the thread quantity based on the number of CPU's
 	coreNum := runtime.NumCPU()
 	fmt.Println("Core numbers: ",coreNum)
+	
+	//read the config file
+	readConfig()
+	
+	//set max memory form config
+	maxMemBytes, _ := config["memory"].(json.Number).Int64()
+	
 	fmt.Println("Max memory defined as: ",maxMemBytes," bytes")
 	runtime.GOMAXPROCS(coreNum)
 
@@ -112,6 +120,50 @@ func main() {
 		fmt.Printf("Natyla ListenAndServe Error",err)
 	}
 
+}
+
+/*
+ * Read the config file
+ */
+func readConfig() {
+
+	//read the config file
+	content, err := ioutil.ReadFile("config.json")
+	if err!=nil {
+		fmt.Println("Can't found 'config.json' using default parameters")
+		config = make(map[string]interface{})
+		config["token"] = "adminToken"
+		var maxMemdefault json.Number = json.Number("1048576")
+		config["memory"] = maxMemdefault
+		
+	} else {
+		config, err = convertJsonToMap(string(content))						
+	}
+	
+	
+	fmt.Println("Using Config:", config)
+
+} 
+
+/*
+ * Convert a Json string to a map
+ */
+func convertJsonToMap(valor string) (map[string]interface{}, error) {
+
+	//Create the Json element
+	d := json.NewDecoder(strings.NewReader(valor))
+	d.UseNumber()
+	var f interface{}
+	err := d.Decode(&f)
+	
+	if err != nil {
+		return nil,err
+	}
+
+	//transform it to a map
+	m := f.(map[string]interface{})
+	return m, nil
+	
 }
 
 /*
@@ -203,7 +255,6 @@ func handleTCPConnection(conn net.Conn){
 			if commandStr[0:6] == "memory" {
 
 				result := "Uses: "+strconv.FormatInt(memBytes,10)+"bytes, "+ strconv.FormatInt((memBytes/(maxMemBytes/100)),10)+"%\n"
-				//result := "Uses: "+strconv.FormatInt(memBytes,10)+"bytes\n"
 				conn.Write([]byte(result))
 
 				continue
