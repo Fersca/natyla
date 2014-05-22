@@ -32,11 +32,48 @@ You can create (or download the example) a config file called config.json, where
 ~~~
 {
   "token":"customToken",
-  "memory":10485760
+  "memory":10485760,
+  "data_dir":"myDir"
 }
 ~~~
 
 
 Using Natyla
 ============
+
+Natyla provides a RESTful API to read, update and store JSON resources.
+
+To create a resource (a Person), just POST or PUT the JSON object to the specific resource:
+~~~
+curl -X POST localhost:8080/Person -d '{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}'
+~~~
+
+*** You Always have to provide an "id" field ***
+
+If you want to read a resource, just call the API with the resource ID:
+
+~~~
+curl -X POST localhost:8080/Person/123456
+~~~
+
+You will get the Stored JSON:
+
+~~~
+{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}
+~~~
+
+If you are curious, you will notice that Natyla stored the JSON resource under you "data" directory.
+The previous example will save the JSON (in plain text) in the following file: 
+
+~~~
+data/Person/123456.json
+~~~
+
+
+
+
+
+
+
+
 

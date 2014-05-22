@@ -86,6 +86,11 @@ func init(){
 	//read the config file
 	readConfig()
 	
+	//create the data directory
+	createDataDir()
+	
+	
+	
 	//set max memory form config
 	maxMemBytes, _ = config["memory"].(json.Number).Int64()
 	fmt.Println("Max memory defined as: ",maxMemBytes/1024/1024," Mbytes")
@@ -123,6 +128,14 @@ func main() {
 }
 
 /*
+ *
+ */
+func createDataDir(){
+	//create the data directory, if it already exist, do nothing
+	os.Mkdir(config["data_dir"].(string),0777)
+}
+
+/*
  * Read the config file
  */
 func readConfig() {
@@ -135,12 +148,11 @@ func readConfig() {
 		config["token"] = "adminToken"
 		var maxMemdefault json.Number = json.Number("10485760")
 		config["memory"] = maxMemdefault
-		
+		config["data_dir"] = "data"
 	} else {
 		config, err = convertJsonToMap(string(content))						
 	}
-	
-	
+	 
 	fmt.Println("Using Config:", config)
 
 } 
@@ -504,11 +516,12 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		*/
 		
 		fmt.Println(m)
-
+		
 		//Checks the data tye of the ID field
 		switch m["id"].(type) {
-		case float64:
-			id = strconv.FormatFloat(m["id"].(float64),'f',-1,64)
+		case json.Number:
+			//id = strconv.FormatFloat(m["id"].(float64),'f',-1,64)
+			id = m["id"].(json.Number).String()
 		case string:
 			id = m["id"].(string)
 		default:
@@ -598,22 +611,22 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 func saveJsonToDisk(createDir bool, col string, id string, valor string) {
 
 	if createDir {
-		os.Mkdir("data/"+col,0777)
+		os.Mkdir(config["data_dir"].(string)+"/"+col,0777)
 	}
 
-	err := ioutil.WriteFile("data/"+col+"/"+id+".json", []byte(valor), 0644)
+	err := ioutil.WriteFile(config["data_dir"].(string)+"/"+col+"/"+id+".json", []byte(valor), 0644)
 	if err!=nil {
 		fmt.Println(err)
 	}
 }
 
 func deleteJsonFromDisk(col string, clave string) (error) {
-	return os.Remove("data/"+col+"/"+clave+".json")
+	return os.Remove(config["data_dir"].(string)+"/"+col+"/"+clave+".json")
 }
 
 func readJsonFromDisK(col string, clave string) ([]byte, error) {
 	fmt.Println("Read from disk: ", col," - ",clave)
-	content, err := ioutil.ReadFile("data/"+col+"/"+clave+".json")
+	content, err := ioutil.ReadFile(config["data_dir"].(string)+"/"+col+"/"+clave+".json")
 	if err!=nil {
 		fmt.Println(err)
 	}
