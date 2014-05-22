@@ -48,7 +48,7 @@ To create a resource (a Person), just POST or PUT the JSON object to the specifi
 curl -X POST localhost:8080/Person -d '{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}'
 ~~~
 
-*** You Always have to provide an "id" field ***
+**You Always have to provide an "id" field**
 
 If you want to read a resource, just call the API with the resource ID:
 
