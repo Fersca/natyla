@@ -14,6 +14,7 @@ go run natyla.go
 It will start Natyla with the default configuration:
   - 10MB memory cache.
   - "adminToken" as default token for admin access to PUT/POST/DELETE.
+  - $CURRENT_DIR/data as default directory for storing resources and JSON Objects. 
 ~~~
 Starting Natyla...
 Core numbers:  4
@@ -32,14 +33,15 @@ You can create (or download the example) a config file called config.json, where
 ~~~
 {
   "token":"customToken",
+  "cache":false,
   "memory":10485760,
   "data_dir":"myDir"
 }
 ~~~
 
 
-Using Natyla
-============
+Using Natyla RESTful API
+========================
 
 Natyla provides a RESTful API to read, update and store JSON resources.
 
@@ -69,10 +71,16 @@ The previous example will save the JSON (in plain text) in the following file:
 data/Person/123456.json
 ~~~
 
+To delete an Object, just delete it indicating the Object ID:
 
+~~~
+curl -X DELETE localhost:8080/Person/123456
+~~~
 
+Caching
+=======
 
-
+If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.
 
 
 

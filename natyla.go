@@ -422,6 +422,7 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 
 			if element!=nil {
 				//Write the response to the client
+				headerMap.Add("Content-Type","application/json")
 				w.Write([]byte(element))
 			} else {
 				if err==nil {
@@ -465,7 +466,6 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 			//Get the vale from the cache
 			//result := deleteElement(comandos[0],atoi(comandos[1]))
 			result := deleteElement(comandos[0],comandos[1])
-
 			if result==false {
 				//Return a not-found				
 				w.WriteHeader(404)
@@ -506,17 +506,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 
 		//transform it to a map
 		m := f.(map[string]interface{})
-		
-		//Create the Json element
-		/*
-		m, err:= convertJsonToMap(valor)
-		if err != nil {
-			return "",err
-		}
-		*/
-		
-		fmt.Println(m)
-		
+				
 		//Checks the data tye of the ID field
 		switch m["id"].(type) {
 		case json.Number:
@@ -529,7 +519,6 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		}
 
 		//Add the value to the list and get the pointer to the node
-		fmt.Println("imprime el id porque queda mal: ",id)
 		n := node{m,false,false,col,id}
 
 		lisChan <- 1
@@ -822,13 +811,13 @@ func moveFront(elemento *list.Element){
 func deleteElement(col string, clave string) bool {
 
 	//Get the element collection
-        cc := collections[col]
-
-        //Get the element from the map
-        elemento := cc.Mapa[clave]
-
-        //checks if the element exists in the cache
-        if elemento!=nil {
+	cc := collections[col]
+	
+	//Get the element from the map
+	elemento := cc.Mapa[clave]
+	
+	//checks if the element exists in the cache
+	if elemento!=nil {
 
 		//if it is marked as deleted, return a not-found directly without checking the disk
 		if elemento.Value.(node).Deleted==true {
@@ -846,7 +835,6 @@ func deleteElement(col string, clave string) bool {
 			deletedNode.V = nil
 			deletedNode.Deleted = true
 			elemento.Value=deletedNode
-
 			fmt.Println("Caching Not-found for, ID: ",clave)
 
 		} else {
@@ -856,18 +844,18 @@ func deleteElement(col string, clave string) bool {
 			<- cc.Canal
 		}
 
-                //In both cases, remove the element from the list and from disk in a separated gorutine
-                go func(){
+		//In both cases, remove the element from the list and from disk in a separated gorutine
+		go func(){
+			deleteElementFromLRU(elemento)
 
-                        deleteElementFromLRU(elemento)
+			deleteJsonFromDisk(col, clave)
 
-                        deleteJsonFromDisk(col, clave)
+			//Print message
+			if enablePrint {fmt.Println("Delete successfull, ID: ",clave)}
+		}()
 
-                        //Print message
-                        if enablePrint {fmt.Println("Delete successfull, ID: ",clave)}
-                }()
-
-        } else {
+	} else {
+	
 		fmt.Println("Delete element not in memory, ID: ",clave)
 		//TODO: terminar esto
 
@@ -885,9 +873,9 @@ func deleteElement(col string, clave string) bool {
 			return false
 		}
 
-        }
+	}
 
-        return true
+	return true
 
 }
 
