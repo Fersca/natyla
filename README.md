@@ -11,9 +11,7 @@ Just install [golang](http://golang.org/) and run:
 ~~~
 go run natyla.go
 ~~~
-It will start Natyla with the default configuration:
-	- 10MB memory cache
-	- "adminToken" as default token for admin access to PUT/POST/DELETE
+It will start Natyla with the default configuration: 10MB memory cache, "adminToken" as default token for admin access to PUT/POST/DELETE.
 ~~~
 Starting Natyla...
 Core numbers:  4
