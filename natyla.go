@@ -87,9 +87,9 @@ func init(){
 	readConfig()
 	
 	//set max memory form config
-	maxMemBytes, _ := config["memory"].(json.Number).Int64()
-	
+	maxMemBytes, _ = config["memory"].(json.Number).Int64()
 	fmt.Println("Max memory defined as: ",maxMemBytes/1024/1024," Mbytes")
+	
 	runtime.GOMAXPROCS(coreNum)
 
 	//Create a new doble-linked list to act as LRU
@@ -494,6 +494,15 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 
 		//transform it to a map
 		m := f.(map[string]interface{})
+		
+		//Create the Json element
+		/*
+		m, err:= convertJsonToMap(valor)
+		if err != nil {
+			return "",err
+		}
+		*/
+		
 		fmt.Println(m)
 
 		//Checks the data tye of the ID field
@@ -658,19 +667,15 @@ func getElement(col string, id string) ([]byte, error) {
 	if elemento.Value.(node).Swap==true {
 
 		//Read the swapped json from disk
-		b, _:=readJsonFromDisK(col, id)
+		b, _:= readJsonFromDisK(col, id)
 
 		//TODO: read if there was an error and do something...
 
-		//convert the content into json
-		var f interface{}
-		err := json.Unmarshal(b, &f)
+		m, err := convertJsonToMap(string(b))
 
 		if err != nil {
 			return nil,err
 		}
-
-		m := f.(map[string]interface{})
 
 		//save the map in the node, mark it as un-swapped
 		var unswappedNode node
@@ -754,6 +759,8 @@ func purgeLRU(){
 
 	//Checks the memory limit and decrease it if it's necessary
 	for memBytes>maxMemBytes {
+
+		fmt.Println(memBytes," - ",maxMemBytes)
 
 		fmt.Println("Max memory reached! swapping", memBytes)
 
