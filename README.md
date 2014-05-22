@@ -3,8 +3,8 @@ Natyla
 
 Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.
 
-Install
-=======
+Install and Run
+===============
 
 Just install [golang](http://golang.org/) and run:
 
@@ -24,4 +24,19 @@ Ready.
 -------------------------------
 ~~~
 
+Custom Config
+=============
+
+You can create (or download the example) a config file called config.json, where you can setup a custom configuration.
+
+~~~
+{
+  "token":"customToken",
+  "memory":10485760
+}
+~~~
+
+
+Using Natyla
+============
 
