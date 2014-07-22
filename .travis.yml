@@ -1,7 +1,7 @@
 language: go
 notificaitons:
   email:
-      recipients: your.email@host.com
+      recipients: fersca@hotmail.com
       on_success: change
       on_failure: always
 before_script:
