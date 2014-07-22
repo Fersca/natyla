@@ -2,6 +2,7 @@ Natyla
 ======
 
 [![Build Status](https://travis-ci.org/Fersca/Natyla.svg?branch=master)](https://travis-ci.org/Fersca/Natyla)
+[![Build Status](https://drone.io/github.com/Fersca/Natyla/status.png)](https://drone.io/github.com/Fersca/Natyla/latest)
 
 Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.
 
