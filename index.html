@@ -28,37 +28,86 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+          <h1>
+<a name="natyla" class="anchor" href="#natyla"><span class="octicon octicon-link"></span></a>Natyla</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p><a href="https://travis-ci.org/Fersca/Natyla"><img src="https://travis-ci.org/Fersca/Natyla.svg?branch=master" alt="Build Status"></a></p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.</p>
+
+<h1>
+<a name="install-and-run" class="anchor" href="#install-and-run"><span class="octicon octicon-link"></span></a>Install and Run</h1>
+
+<p>Just install <a href="http://golang.org/">golang</a> and run:</p>
+
+<pre><code>go run natyla.go
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>It will start Natyla with the default configuration:</p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<ul>
+<li>10MB memory cache.</li>
+<li>"adminToken" as default token for admin access to PUT/POST/DELETE.</li>
+<li>$CURRENT_DIR/data as default directory for storing resources and JSON Objects. </li>
+</ul><pre><code>Starting Natyla...
+Core numbers:  4
+Can't found 'config.json' using default parameters
+Using Config: map[token:adminToken memory:10485760]
+Max memory defined as:  10  Mbytes
+Ready.
+-------------------------------
+</code></pre>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<h1>
+<a name="custom-config" class="anchor" href="#custom-config"><span class="octicon octicon-link"></span></a>Custom Config</h1>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<p>You can create (or download the example) a config file called config.json, where you can setup a custom configuration.</p>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<pre><code>{
+  "token":"customToken",
+  "cache":false,
+  "memory":10485760,
+  "data_dir":"myDir"
+}
+</code></pre>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<h1>
+<a name="using-natyla-restful-api" class="anchor" href="#using-natyla-restful-api"><span class="octicon octicon-link"></span></a>Using Natyla RESTful API</h1>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>Natyla provides a RESTful API to read, update and store JSON resources.</p>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<p>To create a resource (a Person), just POST or PUT the JSON object to the specific resource:</p>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<pre><code>curl -X POST localhost:8080/Person -d '{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}'
+</code></pre>
+
+<p><strong>You Always have to provide an "id" field</strong></p>
+
+<p>If you want to read a resource, just call the API with the resource ID:</p>
+
+<pre><code>curl -X POST localhost:8080/Person/123456
+</code></pre>
+
+<p>You will get the Stored JSON:</p>
+
+<pre><code>{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}
+</code></pre>
+
+<p>If you are curious, you will notice that Natyla stored the JSON resource under you "data" directory.
+The previous example will save the JSON (in plain text) in the following file: </p>
+
+<pre><code>data/Person/123456.json
+</code></pre>
+
+<p>To delete an Object, just delete it indicating the Object ID:</p>
+
+<pre><code>curl -X DELETE localhost:8080/Person/123456
+</code></pre>
+
+<h1>
+<a name="caching" class="anchor" href="#caching"><span class="octicon octicon-link"></span></a>Caching</h1>
+
+<p>If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.</p>
         </section>
 
         <aside id="sidebar">
