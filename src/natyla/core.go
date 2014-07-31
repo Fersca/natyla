@@ -10,21 +10,19 @@
  * LRU and MAP modifications are performed through channels in order to keep them synchronized.
  * Bytes stored are counted in order to limit the amount of memory used by the application.
  *
+ * Core Module
+ * Manage the internal Memory Access, LRU, concurrency and Swapping
  */
 
-package main
+package natyla
 
 import (
 	"fmt"
 	"container/list"
-	"net"
-	"net/http"
 	"runtime"
 	"encoding/json"
 	"strings"
 	"strconv"
-	"io/ioutil"
-	"os"
 	"errors"
 )
 
@@ -46,26 +44,6 @@ var collectionChan chan int
 
 //Print information
 const enablePrint bool = false
-
-//Struct to hold the value and the key in the LRU
-type node struct {
-	V map[string]interface{}
-	Swap bool
-	Deleted bool
-	col string
-	key string
-}
-//Struct to hold the value and the key in the LRU
-type searchNode struct {
-	Id string
-	Document map[string]interface{}
-}
-
-//Holds the relation between the diferent collections of element with the corresponding channel to write it
-type collectionChannel struct {
-	Mapa map[string]*list.Element
-	Canal chan int
-}
 
 //Create the map that stores the list of collections
 var collections map[string]collectionChannel
@@ -89,8 +67,6 @@ func init(){
 	//create the data directory
 	createDataDir()
 	
-	
-	
 	//set max memory form config
 	maxMemBytes, _ = config["memory"].(json.Number).Int64()
 	fmt.Println("Max memory defined as: ",maxMemBytes/1024/1024," Mbytes")
@@ -113,49 +89,14 @@ func init(){
 /*
  * Create the server
  */
-func main() {
-
+func Start() {
 	//Start the console
 	go console()
 
-	//Create the webserver
-	http.Handle("/", http.HandlerFunc(processRequest))
-	err := http.ListenAndServe("0.0.0.0:8080", nil)
-	if err != nil {
-		fmt.Printf("Natyla ListenAndServe Error",err)
-	}
-
+	//Start the rest API
+	restAPI()
+		
 }
-
-/*
- *
- */
-func createDataDir(){
-	//create the data directory, if it already exist, do nothing
-	os.Mkdir(config["data_dir"].(string),0777)
-}
-
-/*
- * Read the config file
- */
-func readConfig() {
-
-	//read the config file
-	content, err := ioutil.ReadFile("config.json")
-	if err!=nil {
-		fmt.Println("Can't found 'config.json' using default parameters")
-		config = make(map[string]interface{})
-		config["token"] = "adminToken"
-		var maxMemdefault json.Number = json.Number("10485760")
-		config["memory"] = maxMemdefault
-		config["data_dir"] = "data"
-	} else {
-		config, err = convertJsonToMap(string(content))						
-	}
-	 
-	fmt.Println("Using Config:", config)
-
-} 
 
 /*
  * Convert a Json string to a map
@@ -177,311 +118,6 @@ func convertJsonToMap(valor string) (map[string]interface{}, error) {
 	return m, nil
 	
 }
-
-/*
- * Start the command console
- */
-func console(){
-
-	ln, err := net.Listen("tcp", ":8081")
-	if err != nil {
-		// handle error
-	}
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			// handle error
-			continue
-		}
-		go handleTCPConnection(conn)
-	}
-
-}
-
-/*
- * Process each HTTP connection
- */
-func handleTCPConnection(conn net.Conn){
-
-	fmt.Println("Connection stablished")
-
-	//Create the array to hold the command
-	var command []byte = make([]byte,100)
-
-	for {
-		//Read from connection waiting for a command
-		cant, err := conn.Read(command)
-		if err == nil {
-
-			//read the command and create the string
-			var commandStr string = string(command)
-
-			//Exit the connection
-			if commandStr[0:4] == "exit" {
-				fmt.Println("Cerrando Conexion")
-				conn.Close()
-				return
-			}
-
-			//Get the element
-			if commandStr[0:3] == "get" {
-
-				comandos := strings.Split(commandStr[:cant-2]," ")
-
-				fmt.Println("Collection: ",comandos[1], " - ",len(comandos[1]))
-				fmt.Println("Id: ",comandos[2]," - ",len(comandos[2]))
-
-				b,err := getElement(comandos[1],comandos[2])
-
-				if b!=nil {
-					conn.Write(b)
-					conn.Write([]byte("\n"))
-				} else {
-					if err==nil{
-						conn.Write([]byte("Key not found\n"))
-					} else {
-						fmt.Println("Error: ", err)
-					}
-				}
-				continue
-			}
-
-			//Get the total quantity of elements
-			if commandStr[0:8] == "elements" {
-
-				comandos := strings.Split(commandStr[:cant-2]," ")
-
-				fmt.Println("Collection: ",comandos[1], " - ",len(comandos[1]))
-
-				b, err := getElements(comandos[1])
-				if err==nil {
-					conn.Write(b)
-					conn.Write([]byte("\n"))
-				} else {
-					fmt.Println("Error: ", err)
-				}
-				continue
-			}
-
-			//return the bytes used
-			if commandStr[0:6] == "memory" {
-
-				result := "Uses: "+strconv.FormatInt(memBytes,10)+"bytes, "+ strconv.FormatInt((memBytes/(maxMemBytes/100)),10)+"%\n"
-				conn.Write([]byte(result))
-
-				continue
-			}
-
-
-			//POST elements
-			if commandStr[0:4] == "post" {
-
-				comandos := strings.Split(commandStr[:cant-2]," ")
-
-				fmt.Println("Collection: ",comandos[1], " - ",len(comandos[1]))	
-				fmt.Println("JSON: ",comandos[2]," - ",len(comandos[2]))
-
-				id,err := createElement(comandos[1],"",comandos[3],true,false)
-
-				var result string
-				if err!=nil{
-					fmt.Println(err)
-				} else {
-					//result = "Element Created: "+strconv.Itoa(id)+"\n"
-					result = "Element Created: "+id+"\n"
-					conn.Write([]byte(result))
-				}
-
-				continue
-			}
-
-			if commandStr[0:6] == "delete" {
-
-				comandos := strings.Split(commandStr[:cant-2]," ")
-
-				//Get the vale from the cache
-				//result := deleteElement(comandos[1],atoi(comandos[2]))
-				result := deleteElement(comandos[1],comandos[2])
-
-				if result==false {
-					//Return a not-found				
-					conn.Write([]byte("Key not found"))
-				} else {
-					//Return a Ok
-					response := "Key: "+comandos[2]+" from: "+comandos[1]+" deleted\n"
-					conn.Write([]byte(response))
-				}
-
-				continue
-
-			}
-
-			if commandStr[0:6] == "search" {
-
-				comandos := strings.Split(commandStr[:cant-2]," ")
-
-				result, err := search(comandos[1],comandos[2],comandos[3])
-
-				if err!=nil {
-					fmt.Println(result)
-					conn.Write([]byte("Error searching\n"))
-				} else {
-					conn.Write([]byte(result))
-				}
-				continue
-			}
-
-			//Exit the connection
-			if commandStr[0:4] == "help" {
-				result := showHelp()
-				conn.Write([]byte(result))
-				continue
-			}
-
-			//Default Message
-			fmt.Println("Comando no definido: ", commandStr)
-			conn.Write([]byte("Unknown Command\n"))
-
-		} else {
-			fmt.Println("Error: ", err)
-		}
-
-	}
-
-}
-
-/*
- * Help
- */
-func showHelp() string {
-
-	var help string = "\n\n"
-
-	help += "---------------------------------------------------------------\n"
-	help += "Natyla 1.0"
-	help += "---------------------------------------------------------------\n\n"
-
-	help += "Telnet Available commands:\n\n"
-
-	help += "- 'exit':                                Close the connection.\n"
-	help += "- 'get {collection} {key}':              Get the JSON document from the specified collection.\n"
-	help += "- 'elements {collection}':               Get the total elemets from the specified collection.\n"
-	help += "- 'memory':                              Get the total ammount of memory used.\n"
-	help += "- 'post {collection} {key} {json}':      Save a new JSON document in the specified collection.\n"
-	help += "- 'delete {collection} {key}':           Delete the JSON document from the specified collection.\n"
-	help += "- 'search {collection} {field} {value}': Search in the specified collection for Jsons with fields in the indicated value.\n"
-	help += "\n"
-	help += "HTTP Available commands (same as above):\n\n"
-
-	help += "POST/PUT --> localhost:8080/{collection}/{key}    body={json}\n"
-	help += "DELETE   --> localhost:8080/{collection}/{key} \n"  
-	help += "GET      <-- localhost:8080/{collection}/{key} \n"
-	help += "GET      <-- localhost:8080/search?col={collection}&field={field}&value={value}\n"
-	help += "\n"
-	return help
-
-}
-
-/*
- * Process the commands recived from internet
- */
-func processRequest(w http.ResponseWriter, req *http.Request){
-	//Get the headers map	
-	headerMap := w.Header()
-	//Add the new headers
-	headerMap.Add("System","Natyla 1.0")
-	//PrintInformation
-	printRequest(req)
-
-	comandos := strings.Split(req.URL.Path[1:],"/")
-
-	//Performs action based on the request Method
-	switch req.Method {
-
-		case "GET":
-
-			//Serch for the specific field in the collection
-			if req.URL.Path[1:]=="search" {
-				col := req.FormValue("col")
-				key := req.FormValue("field")
-				value := req.FormValue("value")
-				fmt.Println("Searching for:",col,key,value)
-				result, err := search(col,key, value)
-				if err!=nil {
-					fmt.Println(result)
-					w.WriteHeader(500)
-					return
-				}
-				w.Write(result)
-				return
-			}
-
-			//Get the vale from the cache
-			//element, err := getElement(comandos[0],atoi(comandos[1]))
-			element, err := getElement(comandos[0],comandos[1])
-
-			if element!=nil {
-				//Write the response to the client
-				headerMap.Add("Content-Type","application/json")
-				w.Write([]byte(element))
-			} else {
-				if err==nil {
-					//Return a not-found				
-					w.WriteHeader(404)
-				} else {
-					headerMap.Add("Error","Invalid JSON Disk")
-					w.WriteHeader(500)
-				}
-			}
-
-		case "PUT":
-			fallthrough
-		case "POST":
-			//Create the array to hold the body
-			var p []byte = make([]byte,req.ContentLength)
-
-			//Reads the body content 
-			req.Body.Read(p)
-
-			//Save the element in the cache			
-			id, err := createElement(comandos[0],"",string(p),true,false)
-
-			if err!=nil{
-				fmt.Println("Error code:",err.Error())
-				if err.Error()=="invalid_id"{
-					headerMap.Add("Error","Invalid ID field")
-					w.WriteHeader(400)
-				} else {  
-					fmt.Println(err)
-					w.WriteHeader(500)
-				}
-			} else {
-				//headerMap.Add("element_id",strconv.Itoa(id))
-				headerMap.Add("location",comandos[0]+"/"+id)
-				//Response the 201 - created to the client
-				w.WriteHeader(201)
-			}
-
-		case "DELETE":
-			//Get the vale from the cache
-			//result := deleteElement(comandos[0],atoi(comandos[1]))
-			result := deleteElement(comandos[0],comandos[1])
-			if result==false {
-				//Return a not-found				
-				w.WriteHeader(404)
-			} else {
-				//Return a Ok
-				w.WriteHeader(200)
-			}
-
-		default:
-			if enablePrint {fmt.Println("Not Supported: ", req.Method)}
-			 //Method Not Allowed
-			w.WriteHeader(405)
-	}
-
-}
-
 
 /*
  * Create the element in the collection
@@ -597,31 +233,6 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 	return id,nil
 }
 
-func saveJsonToDisk(createDir bool, col string, id string, valor string) {
-
-	if createDir {
-		os.Mkdir(config["data_dir"].(string)+"/"+col,0777)
-	}
-
-	err := ioutil.WriteFile(config["data_dir"].(string)+"/"+col+"/"+id+".json", []byte(valor), 0644)
-	if err!=nil {
-		fmt.Println(err)
-	}
-}
-
-func deleteJsonFromDisk(col string, clave string) (error) {
-	return os.Remove(config["data_dir"].(string)+"/"+col+"/"+clave+".json")
-}
-
-func readJsonFromDisK(col string, clave string) ([]byte, error) {
-	fmt.Println("Read from disk: ", col," - ",clave)
-	content, err := ioutil.ReadFile(config["data_dir"].(string)+"/"+col+"/"+clave+".json")
-	if err!=nil {
-		fmt.Println(err)
-	}
-
-	return content,err
-}
 
 /*
  * Get the element from the Map and push the element to the first position of the LRU-List 
@@ -698,7 +309,7 @@ func getElement(col string, id string) ([]byte, error) {
 
 }
 
-func atoi(value string) int {
+func Atoi(value string) int {
 	number, _ := strconv.Atoi(value)
 	return number
 }
@@ -711,47 +322,6 @@ func getElements(col string) ([]byte, error){
 	b, err := json.Marshal(len(cc.Mapa))
 
 	return b, err
-}
-
-/*
- * Search the jsons that has the key with the specified value
- */
-func search(col string, key string, value string) ([]byte, error) {
-
-	arr := make([]interface{},0)
-	cc := collections[col]
-
-	//Search the Map for the value
-	for id, v := range cc.Mapa {
-		//TODO: This is absolutely inefficient, I'm creating a new array for each iteration. Fix this.
-		//Is this possible to have something like java ArrayLists  ?
-		nod := v.Value.(node)
-		sNode := searchNode{id,nod.V}
-		if nod.V[key]==value {
-			arr = append(arr,sNode)
-		}
-	}
-
-	//Create the Json object
-	b, err := json.Marshal(arr)
-
-	return b, err
-
-}
-
-
-/*
- * Print the request information 
- */
-func printRequest(req *http.Request){
-
-	//Print request information
-	if enablePrint {
-		fmt.Println("-------------------")
-		fmt.Println("Method: ",req.Method)
-		fmt.Println("URL: ",req.URL)
-		fmt.Println("Headers: ",req.Header)
-	}
 }
 
 /*
