@@ -314,6 +314,11 @@ func Atoi(value string) int {
 	return number
 }
 
+func atoi(value string) int {
+	number, _ := strconv.Atoi(value)
+	return number
+}
+
 /*
  * Get the number of elements
  */
