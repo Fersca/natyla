@@ -1,7 +1,7 @@
 package main 
 
 import (
-	"natyla"
+	"github.com/Fersca/natyla/src/natyla"
 )
 
 /*
