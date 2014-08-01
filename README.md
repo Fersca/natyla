@@ -61,7 +61,7 @@ curl -X POST localhost:8080/Person -d '{"id":123456,"name":"Ferdinand", "age":32
 If you want to read a resource, just call the API with the resource ID:
 
 ~~~
-curl -X POST localhost:8080/Person/123456
+curl localhost:8080/Person/123456
 ~~~
 
 You will get the Stored JSON:
