@@ -11,9 +11,10 @@ Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure a
 Install and Run
 ===============
 
-Just install [golang](http://golang.org/) and run:
+Just clone this repository, install [golang](http://golang.org/) and run:
 
 ~~~
+go get
 go run natyla.go
 ~~~
 It will start Natyla with the default configuration:
