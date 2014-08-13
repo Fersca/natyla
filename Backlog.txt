@@ -1,0 +1,29 @@
+Natyla Backlog
+--------------
+
+PENDING
+-------
+
+- JSON pretty format when API call is coming from a browser [easy]
+- HTTP push notifications to subscribed clients, with retry [medium]
+- Notification stream throw TCP port [medium]
+- Resource Structure validation [medium]
+- Master/Slave replication [hard]
+- WEB console administration [hard]
+- Synchronization in accessing channels and maps (check) [easy]
+- MongoDB export utility [hard]
+- Multiget features (return severals resources IDs in the same request after /resource?ids=X1,X2,X3,etc) [easy]
+- Selection support (return only asked fields: /resource?attributes=nickname, points) [easy]
+
+DONE
+----
+
+- Load Config from file
+- Management console throw telnet
+- POST / PUT only with access_token authentication
+- Save JSON resource to Disk
+- Swap memory cache content to disk when when max memory reached
+- REST API (GET, POST, PUT, DELETE) any resource
+- Cache with LRU cleaning algorithm
+- Search resources that mach specified condition in GET eg: /users?nickname=fer
+
