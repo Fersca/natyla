@@ -11,9 +11,10 @@ Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure a
 Install and Run
 ===============
 
-Just install [golang](http://golang.org/) and run:
+Just clone this repository, install [golang](http://golang.org/) and run:
 
 ~~~
+go get
 go run natyla.go
 ~~~
 It will start Natyla with the default configuration:
@@ -60,7 +61,7 @@ curl -X POST localhost:8080/Person -d '{"id":123456,"name":"Ferdinand", "age":32
 If you want to read a resource, just call the API with the resource ID:
 
 ~~~
-curl -X POST localhost:8080/Person/123456
+curl localhost:8080/Person/123456
 ~~~
 
 You will get the Stored JSON:
