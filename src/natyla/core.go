@@ -1,11 +1,11 @@
-/* 
+/*
  * Natyla - FullStack API/Cache/Store
  *
  * 2014 - Fernando Scasserra - twitter: @fersca.
  *
  * Natyla is a persistance cache system written in golang that performs in constant time.
  * It keeps a MAP to store the object internally, and a Double Linked list to purge the LRU elements.
- * 
+ *
  * LRU updates are done in backgrounds gorutines.
  * LRU and MAP modifications are performed through channels in order to keep them synchronized.
  * Bytes stored are counted in order to limit the amount of memory used by the application.
@@ -17,13 +17,13 @@
 package natyla
 
 import (
-	"fmt"
 	"container/list"
-	"runtime"
 	"encoding/json"
-	"strings"
-	"strconv"
 	"errors"
+	"fmt"
+	"runtime"
+	"strconv"
+	"strings"
 )
 
 //Create the list to support the LRU List
@@ -52,33 +52,33 @@ var config map[string]interface{}
 /*
  * Init the system variables
  */
-func init(){
+func init() {
 
 	//Welcome Message
 	fmt.Println("Starting Natyla...")
 
 	//Set the thread quantity based on the number of CPU's
 	coreNum := runtime.NumCPU()
-	fmt.Println("Core numbers: ",coreNum)
-	
+	fmt.Println("Core numbers: ", coreNum)
+
 	//read the config file
 	readConfig()
-	
+
 	//create the data directory
 	createDataDir()
-	
+
 	//set max memory form config
 	maxMemBytes, _ = config["memory"].(json.Number).Int64()
-	fmt.Println("Max memory defined as: ",maxMemBytes/1024/1024," Mbytes")
-	
+	fmt.Println("Max memory defined as: ", maxMemBytes/1024/1024, " Mbytes")
+
 	runtime.GOMAXPROCS(coreNum)
 
 	//Create a new doble-linked list to act as LRU
-	lista  = list.New()
+	lista = list.New()
 
 	//Create the channels
-	lisChan = make(chan int,1)
-	collectionChan = make(chan int,1)
+	lisChan = make(chan int, 1)
+	collectionChan = make(chan int, 1)
 
 	collections = make(map[string]collectionChannel)
 
@@ -95,7 +95,7 @@ func Start() {
 
 	//Start the rest API
 	restAPI()
-		
+
 }
 
 /*
@@ -108,41 +108,41 @@ func convertJsonToMap(valor string) (map[string]interface{}, error) {
 	d.UseNumber()
 	var f interface{}
 	err := d.Decode(&f)
-	
+
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	//transform it to a map
 	m := f.(map[string]interface{})
 	return m, nil
-	
+
 }
 
 /*
  * Create the element in the collection
  */
-func createElement(col string, id string, valor string, saveToDisk bool, deleted bool) (string,error) {
+func createElement(col string, id string, valor string, saveToDisk bool, deleted bool) (string, error) {
 
 	//create the list element
 	var elemento *list.Element
 	b := []byte(valor)
 
-	if deleted==false {
+	if deleted == false {
 
 		//Create the Json element
 		d := json.NewDecoder(strings.NewReader(valor))
 		d.UseNumber()
 		var f interface{}
 		err := d.Decode(&f)
-		
+
 		if err != nil {
-			return "",err
+			return "", err
 		}
 
 		//transform it to a map
 		m := f.(map[string]interface{})
-				
+
 		//Checks the data tye of the ID field
 		switch m["id"].(type) {
 		case json.Number:
@@ -151,24 +151,24 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		case string:
 			id = m["id"].(string)
 		default:
-			return "",errors.New("invalid_id")
+			return "", errors.New("invalid_id")
 		}
 
 		//Add the value to the list and get the pointer to the node
-		n := node{m,false,false,col,id}
+		n := node{m, false, false, col, id}
 
 		lisChan <- 1
 		elemento = lista.PushFront(n)
-		<- lisChan
+		<-lisChan
 
 	} else {
 
 		//if not found cache is disabled
-		if cacheNotFound==false {
-			return id,nil
+		if cacheNotFound == false {
+			return id, nil
 		}
 
-		fmt.Println("Creating node as deleted: ",col,id)
+		fmt.Println("Creating node as deleted: ", col, id)
 		//create the node as deleted
 		var n node
 		n.V = nil
@@ -184,14 +184,14 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 	cc := collections[col]
 	var createDir bool = false
 
-	if cc.Mapa==nil {
+	if cc.Mapa == nil {
 
-		fmt.Println("Creating new collection: ",col)
+		fmt.Println("Creating new collection: ", col)
 		//Create the new map and the new channel
 		var newMapa map[string]*list.Element
 		var newMapChann chan int
 		newMapa = make(map[string]*list.Element)
-		newMapChann = make(chan int,1)
+		newMapChann = make(chan int, 1)
 
 		newCC := collectionChannel{newMapa, newMapChann}
 		newCC.Mapa[id] = elemento
@@ -199,29 +199,31 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		//The collection doesn't exist, create one
 		collectionChan <- 1
 		collections[col] = newCC
-		<- collectionChan
+		<-collectionChan
 		createDir = true
 
 	} else {
-		fmt.Println("Using collection: ",col)
+		fmt.Println("Using collection: ", col)
 		//Save the node in the map
 		cc.Canal <- 1
 		cc.Mapa[id] = elemento
-		<- cc.Canal
+		<-cc.Canal
 	}
 
 	//if we are creating a deleted node, do not save it to disk
-	if deleted==false {
+	if deleted == false {
 
 		//Increase the memory counter in a diffetet gorutinie, save to disk and purge LRU
-		go func(){
+		go func() {
 			//Increments the memory counter (Key + Value in LRU + len of col name, + Key in MAP)
 			memBytes += int64(len(b))
 
-			if enablePrint {fmt.Println("Inc Bytes: ",memBytes)}
+			if enablePrint {
+				fmt.Println("Inc Bytes: ", memBytes)
+			}
 
 			//Save the Json to disk, if it is not already on disk
-			if saveToDisk==true {
+			if saveToDisk == true {
 				saveJsonToDisk(createDir, col, id, valor)
 			}
 
@@ -230,13 +232,12 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		}()
 	}
 
-	return id,nil
+	return id, nil
 }
 
-
 /*
- * Get the element from the Map and push the element to the first position of the LRU-List 
-*/
+ * Get the element from the Map and push the element to the first position of the LRU-List
+ */
 func getElement(col string, id string) ([]byte, error) {
 
 	cc := collections[col]
@@ -245,31 +246,31 @@ func getElement(col string, id string) ([]byte, error) {
 	elemento := cc.Mapa[id]
 
 	//checks if the element exists in the cache
-	if elemento==nil {
-		fmt.Println("Elemento not in memory, reading disk, ID: ",id)
+	if elemento == nil {
+		fmt.Println("Elemento not in memory, reading disk, ID: ", id)
 
 		//read the disk
-		content, er:=readJsonFromDisK(col, id)
+		content, er := readJsonFromDisK(col, id)
 
 		//if file doesnt exists cache the not found and return nil
-		if er!= nil {
+		if er != nil {
 			//create the element and set it as deleted
 			createElement(col, id, "", false, true) // set as deleted and do not save to disk
 		} else {
 			//Create the element from the disk content
-			_,err := createElement(col, id, string(content), false,false) // set to not save to disk
-			if err!=nil{
+			_, err := createElement(col, id, string(content), false, false) // set to not save to disk
+			if err != nil {
 				return nil, errors.New("Invalid Disk JSON")
 			}
 		}
 
 		//call get element again (recursively)
-		return getElement(col,id)
+		return getElement(col, id)
 	}
 
 	//If the Not-found is cached, return false directely
-	if elemento.Value.(node).Deleted==true {
-		fmt.Println("Not-Found cached detected on getting, ID: ",id)
+	if elemento.Value.(node).Deleted == true {
+		fmt.Println("Not-Found cached detected on getting, ID: ", id)
 		return nil, nil
 	}
 
@@ -277,24 +278,24 @@ func getElement(col string, id string) ([]byte, error) {
 	go moveFront(elemento)
 
 	//Verifica si esta swapeado
-	if elemento.Value.(node).Swap==true {
+	if elemento.Value.(node).Swap == true {
 
 		//Read the swapped json from disk
-		b, _:= readJsonFromDisK(col, id)
+		b, _ := readJsonFromDisK(col, id)
 
 		//TODO: read if there was an error and do something...
 
 		m, err := convertJsonToMap(string(b))
 
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 
 		//save the map in the node, mark it as un-swapped
 		var unswappedNode node
 		unswappedNode.V = m
 		unswappedNode.Swap = false
-		elemento.Value=unswappedNode
+		elemento.Value = unswappedNode
 
 		//increase de memory counter
 		memBytes += int64(len(b))
@@ -322,7 +323,7 @@ func atoi(value string) int {
 /*
  * Get the number of elements
  */
-func getElements(col string) ([]byte, error){
+func getElements(col string) ([]byte, error) {
 	cc := collections[col]
 	b, err := json.Marshal(len(cc.Mapa))
 
@@ -332,21 +333,21 @@ func getElements(col string) ([]byte, error){
 /*
  * Purge the LRU List deleting the last element
  */
-func purgeLRU(){
+func purgeLRU() {
 
 	//Checks the memory limit and decrease it if it's necessary
-	for memBytes>maxMemBytes {
+	for memBytes > maxMemBytes {
 
-		fmt.Println(memBytes," - ",maxMemBytes)
+		fmt.Println(memBytes, " - ", maxMemBytes)
 
 		fmt.Println("Max memory reached! swapping", memBytes)
 
 		fmt.Println("LRU Elements: ", lista.Len())
 
-		//Get the last element and remove it. Sync is not needed because nothing 
+		//Get the last element and remove it. Sync is not needed because nothing
 		//happens if the element is moved in the middle of this rutine, at last it will be removed
 		lastElement := lista.Back()
-		if lastElement==nil {
+		if lastElement == nil {
 			fmt.Println("Empty LRU")
 			return
 		}
@@ -358,26 +359,29 @@ func purgeLRU(){
 		var swappedNode node
 		swappedNode.V = nil
 		swappedNode.Swap = true
-		lastElement.Value=swappedNode
+		lastElement.Value = swappedNode
 		//it would be better to replace the content of the node instead of create a new one
 		//but I cant get it done
 
 		//Print a purge
-		if enablePrint {fmt.Println("Purge Done: ",memBytes)}
+		if enablePrint {
+			fmt.Println("Purge Done: ", memBytes)
+		}
 	}
 
 }
 
-
 /*
  * Move the element to the front of the LRU, because it was readed or updated
  */
-func moveFront(elemento *list.Element){
+func moveFront(elemento *list.Element) {
 	//Move the element
 	lisChan <- 1
 	lista.MoveToFront(elemento)
-	<- lisChan
-	if enablePrint {fmt.Println("LRU Updated")}
+	<-lisChan
+	if enablePrint {
+		fmt.Println("LRU Updated")
+	}
 }
 
 /*
@@ -387,62 +391,64 @@ func deleteElement(col string, clave string) bool {
 
 	//Get the element collection
 	cc := collections[col]
-	
+
 	//Get the element from the map
 	elemento := cc.Mapa[clave]
-	
+
 	//checks if the element exists in the cache
-	if elemento!=nil {
+	if elemento != nil {
 
 		//if it is marked as deleted, return a not-found directly without checking the disk
-		if elemento.Value.(node).Deleted==true {
-			fmt.Println("Not-Found cached detected on deleting, ID: ",clave)
+		if elemento.Value.(node).Deleted == true {
+			fmt.Println("Not-Found cached detected on deleting, ID: ", clave)
 			return false
 		}
 
 		//the node was not previously deleted....so exists in the disk
 
 		//if not-found cache is enabled, mark the element as deleted
-		if cacheNotFound==true {
+		if cacheNotFound == true {
 
 			//created a new node and asign it to the element
 			var deletedNode node
 			deletedNode.V = nil
 			deletedNode.Deleted = true
-			elemento.Value=deletedNode
-			fmt.Println("Caching Not-found for, ID: ",clave)
+			elemento.Value = deletedNode
+			fmt.Println("Caching Not-found for, ID: ", clave)
 
 		} else {
 			//if it is not enabled, delete the element from the memory
 			cc.Canal <- 1
 			delete(cc.Mapa, clave)
-			<- cc.Canal
+			<-cc.Canal
 		}
 
 		//In both cases, remove the element from the list and from disk in a separated gorutine
-		go func(){
+		go func() {
 			deleteElementFromLRU(elemento)
 
 			deleteJsonFromDisk(col, clave)
 
 			//Print message
-			if enablePrint {fmt.Println("Delete successfull, ID: ",clave)}
+			if enablePrint {
+				fmt.Println("Delete successfull, ID: ", clave)
+			}
 		}()
 
 	} else {
-	
-		fmt.Println("Delete element not in memory, ID: ",clave)
+
+		fmt.Println("Delete element not in memory, ID: ", clave)
 		//TODO: terminar esto
 
 		//Create a new element with the key in the cache, to save a not-found if it is enable
 		createElement(col, clave, "", false, true)
 
 		//Check is the element exist in the disk
-		err := deleteJsonFromDisk(col,clave)
+		err := deleteJsonFromDisk(col, clave)
 
 		//if exists, direcly remove it and return true
 		//if it not exist return false (because it was not found)
-		if err==nil {
+		if err == nil {
 			return true
 		} else {
 			return false
@@ -465,12 +471,11 @@ func deleteElementFromLRU(elemento *list.Element) {
 	b, _ := json.Marshal(n.V)
 	memBytes -= int64(len(b))
 
-        //Delete the element in the LRU List 
-        lisChan <- 1
-        lista.Remove(elemento)
-        <- lisChan
+	//Delete the element in the LRU List
+	lisChan <- 1
+	lista.Remove(elemento)
+	<-lisChan
 
-	fmt.Println("Dec Bytes: ",len(b))
+	fmt.Println("Dec Bytes: ", len(b))
 
 }
-
