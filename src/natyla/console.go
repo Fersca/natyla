@@ -3,21 +3,21 @@
  *
  * Manage the Natyla administration form console
  *
-*/
+ */
 
 package natyla
 
 import (
-	"net"
-	"strings"
 	"fmt"
+	"net"
 	"strconv"
+	"strings"
 )
 
 /*
  * Start the command console
  */
-func console(){
+func console() {
 
 	ln, err := net.Listen("tcp", ":8081")
 	if err != nil {
@@ -37,12 +37,12 @@ func console(){
 /*
  * Process each HTTP connection
  */
-func handleTCPConnection(conn net.Conn){
+func handleTCPConnection(conn net.Conn) {
 
 	fmt.Println("Connection stablished")
 
 	//Create the array to hold the command
-	var command []byte = make([]byte,100)
+	var command []byte = make([]byte, 100)
 
 	for {
 		//Read from connection waiting for a command
@@ -62,18 +62,18 @@ func handleTCPConnection(conn net.Conn){
 			//Get the element
 			if commandStr[0:3] == "get" {
 
-				comandos := strings.Split(commandStr[:cant-2]," ")
+				comandos := strings.Split(commandStr[:cant-2], " ")
 
-				fmt.Println("Collection: ",comandos[1], " - ",len(comandos[1]))
-				fmt.Println("Id: ",comandos[2]," - ",len(comandos[2]))
+				fmt.Println("Collection: ", comandos[1], " - ", len(comandos[1]))
+				fmt.Println("Id: ", comandos[2], " - ", len(comandos[2]))
 
-				b,err := getElement(comandos[1],comandos[2])
+				b, err := getElement(comandos[1], comandos[2])
 
-				if b!=nil {
+				if b != nil {
 					conn.Write(b)
 					conn.Write([]byte("\n"))
 				} else {
-					if err==nil{
+					if err == nil {
 						conn.Write([]byte("Key not found\n"))
 					} else {
 						fmt.Println("Error: ", err)
@@ -85,12 +85,12 @@ func handleTCPConnection(conn net.Conn){
 			//Get the total quantity of elements
 			if commandStr[0:8] == "elements" {
 
-				comandos := strings.Split(commandStr[:cant-2]," ")
+				comandos := strings.Split(commandStr[:cant-2], " ")
 
-				fmt.Println("Collection: ",comandos[1], " - ",len(comandos[1]))
+				fmt.Println("Collection: ", comandos[1], " - ", len(comandos[1]))
 
 				b, err := getElements(comandos[1])
-				if err==nil {
+				if err == nil {
 					conn.Write(b)
 					conn.Write([]byte("\n"))
 				} else {
@@ -102,29 +102,28 @@ func handleTCPConnection(conn net.Conn){
 			//return the bytes used
 			if commandStr[0:6] == "memory" {
 
-				result := "Uses: "+strconv.FormatInt(memBytes,10)+"bytes, "+ strconv.FormatInt((memBytes/(maxMemBytes/100)),10)+"%\n"
+				result := "Uses: " + strconv.FormatInt(memBytes, 10) + "bytes, " + strconv.FormatInt((memBytes/(maxMemBytes/100)), 10) + "%\n"
 				conn.Write([]byte(result))
 
 				continue
 			}
 
-
 			//POST elements
 			if commandStr[0:4] == "post" {
 
-				comandos := strings.Split(commandStr[:cant-2]," ")
+				comandos := strings.Split(commandStr[:cant-2], " ")
 
-				fmt.Println("Collection: ",comandos[1], " - ",len(comandos[1]))	
-				fmt.Println("JSON: ",comandos[2]," - ",len(comandos[2]))
+				fmt.Println("Collection: ", comandos[1], " - ", len(comandos[1]))
+				fmt.Println("JSON: ", comandos[2], " - ", len(comandos[2]))
 
-				id,err := createElement(comandos[1],"",comandos[3],true,false)
+				id, err := createElement(comandos[1], "", comandos[3], true, false)
 
 				var result string
-				if err!=nil{
+				if err != nil {
 					fmt.Println(err)
 				} else {
 					//result = "Element Created: "+strconv.Itoa(id)+"\n"
-					result = "Element Created: "+id+"\n"
+					result = "Element Created: " + id + "\n"
 					conn.Write([]byte(result))
 				}
 
@@ -133,18 +132,18 @@ func handleTCPConnection(conn net.Conn){
 
 			if commandStr[0:6] == "delete" {
 
-				comandos := strings.Split(commandStr[:cant-2]," ")
+				comandos := strings.Split(commandStr[:cant-2], " ")
 
 				//Get the vale from the cache
 				//result := deleteElement(comandos[1],atoi(comandos[2]))
-				result := deleteElement(comandos[1],comandos[2])
+				result := deleteElement(comandos[1], comandos[2])
 
-				if result==false {
-					//Return a not-found				
+				if result == false {
+					//Return a not-found
 					conn.Write([]byte("Key not found"))
 				} else {
 					//Return a Ok
-					response := "Key: "+comandos[2]+" from: "+comandos[1]+" deleted\n"
+					response := "Key: " + comandos[2] + " from: " + comandos[1] + " deleted\n"
 					conn.Write([]byte(response))
 				}
 
@@ -154,11 +153,11 @@ func handleTCPConnection(conn net.Conn){
 
 			if commandStr[0:6] == "search" {
 
-				comandos := strings.Split(commandStr[:cant-2]," ")
+				comandos := strings.Split(commandStr[:cant-2], " ")
 
-				result, err := search(comandos[1],comandos[2],comandos[3])
+				result, err := search(comandos[1], comandos[2], comandos[3])
 
-				if err!=nil {
+				if err != nil {
 					fmt.Println(result)
 					conn.Write([]byte("Error searching\n"))
 				} else {
@@ -210,12 +209,10 @@ func showHelp() string {
 	help += "HTTP Available commands (same as above):\n\n"
 
 	help += "POST/PUT --> localhost:8080/{collection}/{key}    body={json}\n"
-	help += "DELETE   --> localhost:8080/{collection}/{key} \n"  
+	help += "DELETE   --> localhost:8080/{collection}/{key} \n"
 	help += "GET      <-- localhost:8080/{collection}/{key} \n"
 	help += "GET      <-- localhost:8080/search?col={collection}&field={field}&value={value}\n"
 	help += "\n"
 	return help
 
 }
-
-

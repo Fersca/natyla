@@ -69,7 +69,7 @@ func Test_CreateASimpleResourceWithOutId(t *testing.T) {
 
 }
 
-////////////////////// Utility Functions ////////////////////// 
+////////////////////// Utility Functions //////////////////////
 
 //Check the status code
 func checkStatus(t *testing.T, response *httptest.ResponseRecorder, expected int) {
