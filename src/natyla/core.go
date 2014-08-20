@@ -22,7 +22,6 @@ import (
 	"runtime"
 	"encoding/json"
 	"strings"
-	"strconv"
 	"errors"
 )
 
@@ -59,7 +58,7 @@ func init(){
 
 	//Set the thread quantity based on the number of CPU's
 	coreNum := runtime.NumCPU()
-	fmt.Println("Core numbers: ",coreNum)
+	fmt.Println("Cores number: ",coreNum)
 	
 	//read the config file
 	readConfig()
@@ -82,7 +81,7 @@ func init(){
 
 	collections = make(map[string]collectionChannel)
 
-	fmt.Println("Ready.")
+	fmt.Println("Ready. Listening on http://localhost:8080")
 	fmt.Println("-------------------------------")
 }
 
@@ -307,16 +306,6 @@ func getElement(col string, id string) ([]byte, error) {
 	b, err := json.Marshal(elemento.Value.(node).V)
 	return b, err
 
-}
-
-func Atoi(value string) int {
-	number, _ := strconv.Atoi(value)
-	return number
-}
-
-func atoi(value string) int {
-	number, _ := strconv.Atoi(value)
-	return number
 }
 
 /*

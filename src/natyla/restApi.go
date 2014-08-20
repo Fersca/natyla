@@ -26,6 +26,12 @@ func restAPI() {
  * Process the commands recived from internet
  */
 func processRequest(w http.ResponseWriter, req *http.Request){
+
+	//If favicon.ico then return nothing by now.... :TODO
+	if req.URL.Path =="/favicon.ico" {
+		return 
+	}
+
 	//Get the headers map	
 	headerMap := w.Header()
 	//Add the new headers
@@ -33,8 +39,16 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 	//PrintInformation
 	printRequest(req)
 
+	//get the resources from url	
 	comandos := strings.Split(req.URL.Path[1:],"/")
 
+	//check if the request is on the root, in this case return 400 - Bad request
+	if comandos[0] == "" {
+		w.WriteHeader(400)
+		w.Write([]byte("Need to specify the resource. Eg: '/users/1' for GET or '/users/' with content for POST"))
+		return
+	} 
+	
 	//Performs action based on the request Method
 	switch req.Method {
 
@@ -57,7 +71,6 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 			}
 
 			//Get the vale from the cache
-			//element, err := getElement(comandos[0],atoi(comandos[1]))
 			element, err := getElement(comandos[0],comandos[1])
 
 			if element!=nil {
