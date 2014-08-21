@@ -53,9 +53,9 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 
 	case "GET":
 
-		//Serch for the specific field in the collection
-		if req.URL.Path[1:] == "search" {
-			col := req.FormValue("resource")
+		//Serch for the specific field in the collection		
+		if comandos[1] == "search" {
+			col := comandos[0]
 			key := req.FormValue("field")
 			value := req.FormValue("value")
 			fmt.Println("Searching for:", col, key, value)
@@ -65,9 +65,8 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 				w.WriteHeader(500)
 				return
 			}
-
 			w.Write(result)
-			return
+			return		
 		}
 
 		//Get the vale from the cache
