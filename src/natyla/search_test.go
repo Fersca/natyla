@@ -2,6 +2,7 @@ package natyla
 
 import (
     "testing"
+    "io/ioutil"
 )
 
 //Create a "user" resource and after that search for a filed, check if this resource is retourned
@@ -34,9 +35,15 @@ func Test_search_a_resource_based_on_a_field(t *testing.T) {
 	//search for a resource with equal name
 	response3 := get("/search?col=users&field=country&value=Argentina")
 		
-	//Check the array with only one resource
-	checkContent(t,response3,"["+content1+","+content2+"]")
-	
+	//Check the array with two resources
+	body, _ := ioutil.ReadAll(response3.Body)
+	if string(body) != "["+content1+","+content2+"]" {
+		//Check the array with two resources in the oder order (travis fails without it)	
+		if string(body) != "["+content2+","+content1+"]" {
+			t.Fatalf("Non-expected content %s, expected %s or %s", string(body), "["+content1+","+content2+"]", "["+content2+","+content1+"]")
+		}
+	}
+			
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "2")
 	deleteJsonFromDisk("users", "3")	
