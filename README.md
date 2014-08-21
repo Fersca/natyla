@@ -94,7 +94,7 @@ If you want to search for a particular value in a resource field, you should use
 E.g: If you want to search for all the "engineers" in the "Person" resource, just call:
 
 ~~~
-curl localhost:8080/Person/search?field=profession&value=engineer
+curl localhost:8080/Person/search?field=profession&equal=engineer
 ~~~
 
 And you will get an array of resources that satisfy the query

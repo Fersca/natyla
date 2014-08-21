@@ -57,7 +57,7 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 		if comandos[1] == "search" {
 			col := comandos[0]
 			key := req.FormValue("field")
-			value := req.FormValue("value")
+			value := req.FormValue("equal")
 			fmt.Println("Searching for:", col, key, value)
 			result, err := search(col, key, value)
 			if err != nil {
