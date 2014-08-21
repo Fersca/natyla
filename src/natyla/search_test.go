@@ -21,19 +21,19 @@ func Test_search_a_resource_based_on_a_field(t *testing.T) {
 	post("/users", content2)
 	
 	//search for a resource with equal name
-	response := get("/search?col=users&field=name&value=Natalia")
+	response := get("/search?resource=users&field=name&value=Natalia")
 		
 	//Check the array with only one resource
 	checkContent(t,response,"["+content1+"]")
 	
 	//search for a resource that not exists
-	response2 := get("/search?col=users&field=name&value=Adriana")
+	response2 := get("/search?resource=users&field=name&value=Adriana")
 		
 	//Check the array with any resource
 	checkContent(t,response2,"[]")
 
 	//search for a resource with equal name
-	response3 := get("/search?col=users&field=country&value=Argentina")
+	response3 := get("/search?resource=users&field=country&value=Argentina")
 		
 	//Check the array with two resources
 	body, _ := ioutil.ReadAll(response3.Body)

@@ -55,7 +55,7 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 
 		//Serch for the specific field in the collection
 		if req.URL.Path[1:] == "search" {
-			col := req.FormValue("col")
+			col := req.FormValue("resource")
 			key := req.FormValue("field")
 			value := req.FormValue("value")
 			fmt.Println("Searching for:", col, key, value)

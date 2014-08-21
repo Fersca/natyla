@@ -86,6 +86,24 @@ To delete an Object, just delete it indicating the Object ID:
 curl -X DELETE localhost:8080/Person/123456
 ~~~
 
+Searching
+=========
+
+If you want to search for a particular value in a resource field, you should use the "search" feature from Natyla.
+
+E.g: If you want to search for all the "engineers" in the "Person" resource, just call:
+
+~~~
+curl localhost:8080/search?resource=Person&field=profession&value=engineer
+~~~
+
+And you will get an array of resources that satisfy the query
+
+~~~
+[{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}]
+~~~
+
+
 Caching
 =======
 
