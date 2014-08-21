@@ -124,6 +124,10 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 		t.Fatalf("Non-expected disk content %s, expected %s", string(diskContent), content)
 	}
 	
+	/*
+	// TODO: Do a PUT and check if the content changes in memory, in disk and if the LRU element go to the front
+	*/
+	
 	//Delete the resource
 	deleteReq("/users/1")
 	

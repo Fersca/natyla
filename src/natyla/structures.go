@@ -19,12 +19,6 @@ type node struct {
 	key     string
 }
 
-//Struct to hold the value and the key in the LRU
-type searchNode struct {
-	Id       string
-	Document map[string]interface{}
-}
-
 //Holds the relation between the diferent collections of element with the corresponding channel to write it
 type collectionChannel struct {
 	Mapa  map[string]*list.Element

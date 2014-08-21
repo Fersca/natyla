@@ -19,13 +19,12 @@ func search(col, key, value string) ([]byte, error) {
 	cc := collections[col]
 
 	//Search the Map for the value
-	for id, v := range cc.Mapa {
+	for _, v := range cc.Mapa {
 		//TODO: This is absolutely inefficient, I'm creating a new array for each iteration. Fix this.
 		//Is this possible to have something like java ArrayLists  ?
 		nod := v.Value.(node)
-		sNode := searchNode{id, nod.V}
 		if nod.V[key] == value {
-			arr = append(arr, sNode)
+			arr = append(arr, nod.V)
 		}
 	}
 
