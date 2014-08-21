@@ -1,4 +1,4 @@
-package main 
+package main
 
 import (
 	"github.com/Fersca/natyla/src/natyla"
@@ -9,7 +9,6 @@ import (
  */
 func main() {
 
-	natyla.Start();
+	natyla.Start()
 
 }
-

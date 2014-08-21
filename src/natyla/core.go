@@ -59,8 +59,8 @@ func init() {
 	//Set the thread quantity based on the number of CPU's
 	coreNum := runtime.NumCPU()
 
-	fmt.Println("Cores number: ",coreNum)
-	
+	fmt.Println("Cores number: ", coreNum)
+
 	//read the config file
 	readConfig()
 

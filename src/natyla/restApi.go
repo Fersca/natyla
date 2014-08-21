@@ -24,36 +24,36 @@ func restAPI() {
 /*
  * Process the commands recived from internet
  */
-func processRequest(w http.ResponseWriter, req *http.Request){
+func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	//If favicon.ico then return nothing by now.... :TODO
-	if req.URL.Path =="/favicon.ico" {
-		return 
+	if req.URL.Path == "/favicon.ico" {
+		return
 	}
 
-	//Get the headers map	
+	//Get the headers map
 	headerMap := w.Header()
 	//Add the new headers
 	headerMap.Add("System", "Natyla 1.0")
 	//PrintInformation
 	printRequest(req)
 
-	//get the resources from url	
-	comandos := strings.Split(req.URL.Path[1:],"/")
+	//get the resources from url
+	comandos := strings.Split(req.URL.Path[1:], "/")
 
 	//check if the request is on the root, in this case return 400 - Bad request
 	if comandos[0] == "" {
 		w.WriteHeader(400)
 		w.Write([]byte("Need to specify the resource. Eg: '/users/1' for GET or '/users/' with content for POST"))
 		return
-	} 
-	
+	}
+
 	//Performs action based on the request Method
 	switch req.Method {
 
 	case "GET":
 
-		//Serch for the specific field in the collection		
+		//Serch for the specific field in the collection
 		if comandos[1] == "search" {
 			col := comandos[0]
 			key := req.FormValue("field")
@@ -66,7 +66,7 @@ func processRequest(w http.ResponseWriter, req *http.Request){
 				return
 			}
 			w.Write(result)
-			return		
+			return
 		}
 
 		//Get the vale from the cache
