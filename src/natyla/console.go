@@ -45,8 +45,12 @@ func handleTCPConnection(conn net.Conn) {
 	var command []byte = make([]byte, 100)
 
 	for {
+		
 		//Read from connection waiting for a command
 		cant, err := conn.Read(command)
+
+		fmt.Println("Command:",string(command))
+				
 		if err == nil {
 
 			//read the command and create the string
@@ -90,6 +94,7 @@ func handleTCPConnection(conn net.Conn) {
 				fmt.Println("Collection: ", comandos[1], " - ", len(comandos[1]))
 
 				b, err := getElements(comandos[1])
+
 				if err == nil {
 					conn.Write(b)
 					conn.Write([]byte("\n"))
@@ -122,7 +127,6 @@ func handleTCPConnection(conn net.Conn) {
 				if err != nil {
 					fmt.Println(err)
 				} else {
-					//result = "Element Created: "+strconv.Itoa(id)+"\n"
 					result = "Element Created: " + id + "\n"
 					conn.Write([]byte(result))
 				}
@@ -135,7 +139,6 @@ func handleTCPConnection(conn net.Conn) {
 				comandos := strings.Split(commandStr[:cant-2], " ")
 
 				//Get the vale from the cache
-				//result := deleteElement(comandos[1],atoi(comandos[2]))
 				result := deleteElement(comandos[1], comandos[2])
 
 				if result == false {
@@ -170,17 +173,17 @@ func handleTCPConnection(conn net.Conn) {
 			if commandStr[0:4] == "help" {
 				result := showHelp()
 				conn.Write([]byte(result))
-				return
+				continue
 			}
 
 			//Default Message
 			fmt.Println("Comando no definido: ", commandStr)
 			conn.Write([]byte("Unknown Command\n"))
-			return
+			continue
 
 		} else {
 			fmt.Println("Error: ", err)
-			return
+			continue
 		}
 	}
 }

@@ -110,11 +110,11 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	}
 
 	//check if the element is in the LRU and if its the same as the eleent in the cache
-	lastElement := lista.Back()
-	if lastElement == nil {
+	firstElement := lista.Front()
+	if firstElement == nil {
 		t.Fatalf("LRU element does not exists")
 	}
-	if lastElement != element {
+	if firstElement != element {
 		t.Fatalf("The element is not the same as the LRU element")
 	}
 
@@ -163,9 +163,9 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	}
 
 	//check if it is not in the LRU any more
-	lastElement = lista.Back()
-	if lastElement != nil {
-		t.Fatalf("LRU element exists and it shouldnt")
+	firstElement = lista.Front()
+	if firstElement == delElement {
+		t.Fatalf("The element is the same as the first, its wrong")
 	}
 
 	//check if it is not in the disk any more
