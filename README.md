@@ -6,7 +6,7 @@ Tarvis CI
 Drone CI
 [![Build Status](https://drone.io/github.com/Fersca/natyla/status.png)](https://drone.io/github.com/Fersca/natyla/latest)
 ~~~
-Current Code Coverage: 68.6% and increasing...
+Current Code Coverage: 92.1%
 ~~~
 
 Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.
@@ -86,6 +86,18 @@ To delete an Object, just delete it indicating the Object ID:
 curl -X DELETE localhost:8080/Person/123456
 ~~~
 
+**TODO:** 
+Multiget: In the near future you will be able to request several recources at the same time. Eg:
+
+~~~
+curl localhost:8080/Person?ids=123456,789101
+~~~
+You will receive:
+~~~
+[{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"},{"id":789101,"name":"Norbert", "age":57,"profession":"engineer"}]
+~~~
+
+
 Searching
 =========
 
@@ -103,11 +115,21 @@ And you will get an array of resources that satisfy the query
 [{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}]
 ~~~
 
+**TODO:**
+In the near future you will be able to do "like", "or", "greater than", etc operations on several fields
 
 Caching
 =======
 
 If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.
+
+Notifications
+=============
+
+TODO: 
+Natyla is not providing a notification system by now, but it will. 
+The idea is the following: If you want to be notified for each resource change, you will be able to register your callback URL and Natyla will notify you with a JSON POST. 
+The second notification system will able you to listen to a socket stream and receive the same notifications while you are connected to the channel.
 
 Telnet Administration
 =====================

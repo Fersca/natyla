@@ -11,43 +11,47 @@ type DummyConn struct {
 	T *testing.T
 }
 
-var ready bool = false //the boolean is because an /n is sent at the end, so write is executed twice
 func (d DummyConn) Write(b []byte) (n int, err error) {
 
 	//test the "help" command and check if the repsonse is correct
-	if commandNumber == 1 {
+	checkCommand(1, b, showHelp(), d.T)
+
+	//test if the response was "unknown command" for an unknown command
+	checkCommand(2, b, "Unknown Command\n", d.T)
+
+	//test if the response was "Element Created" for a post command
+	checkCommand(3, b, "Element Created: 1\n", d.T)
+
+	//test the "post" command and check if the repsonse is correct with the content
+	checkCommand(4, b, "{\"id\":1,\"name\":\"Grande\"}\n", d.T)
+
+	//test the "post" command and check if the repsonse is correct with the content
+	checkCommand(5, b, "1\n", d.T)
+
+	//test the "search" command and check if the repsonse is correct with the content
+	checkCommand(6, b, "[{\"id\":1,\"name\":\"Grande\"}]\n", d.T)
+
+	//test the "delete" command response
+	checkCommand(7, b, "Key: 1 from: casa deleted\n", d.T)
+
+	//test the "memory" command response
+	if commandNumber == 8 {
 		response := string(b)
-		if response != showHelp() {
-			d.T.Fatalf("Response: '%s' different from expected: '%s'", response, showHelp())
+		if response[:4] != "Uses" {
+			d.T.Fatalf("Response: '%s' different from expected: '%s'", response[:4], "Uses")
 		}
 	}
 
-	//test if the response was "unknown command"
-	if commandNumber == 2 {
-		response := string(b)
-		if response != "Unknown Command\n" {
-			d.T.Fatalf("Response: '%s' different from expected: '%s'", response, "Unknown Command\n")
-		}
-	}
-
-	//test the "elements" command and check if the repsonse is correct
-	if commandNumber == 3 && ready == false {
-		fmt.Println("Entra una vez")
-		response := string(b)
-		if response != "1" {
-			d.T.Fatalf("Response elements: '%s' different from expected: '%s'", response, "1")
-		} else {
-			ready = true
-			fmt.Println("Pone true")
-		}
-	}
+	//test the get and delete to unknown keys
+	checkCommand(9, b, "Key not found\n", d.T)
+	checkCommand(10, b, "Key not found\n", d.T)
 
 	return 50, nil
 }
 func (d DummyConn) Close() error {
 	//check if the exit was in the specific command
-	if commandNumber != 4 {
-		d.T.Fatalf("Close connection in an invalid command: %n %s", commandNumber, "expected: 3")
+	if commandNumber != 11 {
+		d.T.Fatalf("Close connection in an invalid command: %n %s", commandNumber, "expected: 6")
 	}
 	return nil
 }
@@ -89,7 +93,7 @@ func (d DummyConn) Read(b []byte) (n int, err error) {
 		return sendCommand("pipi", b), nil
 	}
 
-	//test the "elements" command
+	//test the "post" command
 	if commandNumber == 3 {
 
 		//define a json content
@@ -98,13 +102,45 @@ func (d DummyConn) Read(b []byte) (n int, err error) {
 		//delete the previous disk content
 		deleteJsonFromDisk("casa", "1")
 
-		//create the resource
-		responsePost := post("/casa", content)
+		command := "post casa " + content
 
-		//check the response conde
-		checkStatus(d.T, responsePost, 201)
+		return sendCommand(command, b), nil
+	}
 
+	//test the "get" command
+	if commandNumber == 4 {
+		return sendCommand("get casa 1", b), nil
+	}
+
+	//test the "elements" command
+	if commandNumber == 5 {
+		//sends the elements command to the server
 		return sendCommand("elements casa", b), nil
+	}
+
+	//test the "get" command
+	if commandNumber == 6 {
+		return sendCommand("search casa name Grande", b), nil
+	}
+
+	//test the "get" command
+	if commandNumber == 7 {
+		return sendCommand("delete casa 1", b), nil
+	}
+
+	//test the "get" command
+	if commandNumber == 8 {
+		return sendCommand("memory", b), nil
+	}
+
+	//try to get and delete unknown keys
+	if commandNumber == 9 {
+		return sendCommand("get puf 1", b), nil
+	}
+
+	//try to get and delete unknown keys
+	if commandNumber == 10 {
+		return sendCommand("delete purr 1", b), nil
 	}
 
 	//exit the telnet
@@ -112,6 +148,19 @@ func (d DummyConn) Read(b []byte) (n int, err error) {
 
 }
 
+//Check the command number, with the apropiated response content
+func checkCommand(number int, b []byte, content string, t *testing.T) {
+
+	//test if the response was "Element Created"
+	if commandNumber == number {
+		response := string(b)
+		if response != content {
+			t.Fatalf("Response: '%s' different from expected: '%s'", response, content)
+		}
+	}
+}
+
+//send the command to the telnet service
 func sendCommand(content string, b []byte) int {
 	byts := []byte(content)
 	for pos := 0; pos < len(byts); pos++ {

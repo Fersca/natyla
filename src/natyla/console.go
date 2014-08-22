@@ -34,6 +34,14 @@ func console() {
 
 }
 
+//concatenate two byte slices
+func concat(old1, old2 []byte) []byte {
+	newslice := make([]byte, len(old1)+len(old2))
+	copy(newslice, old1)
+	copy(newslice[len(old1):], old2)
+	return newslice
+}
+
 /*
  * Process each HTTP connection
  */
@@ -74,8 +82,7 @@ func handleTCPConnection(conn net.Conn) {
 				b, err := getElement(comandos[1], comandos[2])
 
 				if b != nil {
-					conn.Write(b)
-					conn.Write([]byte("\n"))
+					conn.Write(concat(b, []byte("\n")))
 				} else {
 					if err == nil {
 						conn.Write([]byte("Key not found\n"))
@@ -96,8 +103,7 @@ func handleTCPConnection(conn net.Conn) {
 				b, err := getElements(comandos[1])
 
 				if err == nil {
-					conn.Write(b)
-					conn.Write([]byte("\n"))
+					conn.Write(concat(b, []byte("\n")))
 				} else {
 					fmt.Println("Error: ", err)
 				}
@@ -121,7 +127,7 @@ func handleTCPConnection(conn net.Conn) {
 				fmt.Println("Collection: ", comandos[1], " - ", len(comandos[1]))
 				fmt.Println("JSON: ", comandos[2], " - ", len(comandos[2]))
 
-				id, err := createElement(comandos[1], "", comandos[3], true, false)
+				id, err := createElement(comandos[1], "", comandos[2], true, false)
 
 				var result string
 				if err != nil {
@@ -143,7 +149,7 @@ func handleTCPConnection(conn net.Conn) {
 
 				if result == false {
 					//Return a not-found
-					conn.Write([]byte("Key not found"))
+					conn.Write([]byte("Key not found\n"))
 				} else {
 					//Return a Ok
 					response := "Key: " + comandos[2] + " from: " + comandos[1] + " deleted\n"
@@ -164,7 +170,7 @@ func handleTCPConnection(conn net.Conn) {
 					fmt.Println(result)
 					conn.Write([]byte("Error searching\n"))
 				} else {
-					conn.Write([]byte(result))
+					conn.Write(concat([]byte(result), []byte("\n")))
 				}
 				continue
 			}

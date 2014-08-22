@@ -33,7 +33,7 @@ var maxMemBytes int64
 var memBytes int64 = 0
 
 //const pointerLen int = 4+8 //Bytes of pointer in 32bits machines plus int64 for the key of element in hashmemBytes
-const cacheNotFound bool = true
+var cacheNotFound bool = true
 
 //Channes to sync the List, map
 var lisChan chan int
@@ -42,7 +42,7 @@ var lisChan chan int
 var collectionChan chan int
 
 //Print information
-const enablePrint bool = false
+const enablePrint bool = true
 
 //Create the map that stores the list of collections
 var collections map[string]collectionChannel
@@ -278,7 +278,7 @@ func getElement(col string, id string) ([]byte, error) {
 	//Move the element to the front of the LRU-List using a gorutine
 	go moveFront(elemento)
 
-	//Verifica si esta swapeado
+	//Check if the element is mark as swapped
 	if elemento.Value.(node).Swap == true {
 
 		//Read the swapped json from disk
@@ -352,7 +352,7 @@ func purgeLRU() {
 		swappedNode.Swap = true
 		lastElement.Value = swappedNode
 		//it would be better to replace the content of the node instead of create a new one
-		//but I cant get it done
+		//but I cant get it done TODO: try again with more experience :)
 
 		//Print a purge
 		if enablePrint {

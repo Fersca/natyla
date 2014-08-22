@@ -3,6 +3,7 @@ package natyla
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +14,12 @@ import (
 /*
 RETST API TESTS
 */
+
+//Test the init of the REST API and the telnet admin
+func Test_Start_REST_API_and_Telnet(t *testing.T) {
+	//Only for code coverage because it is not necessary
+	go Start()
+}
 
 //Test if not existing resource return "404 - Not Found"
 func Test_NotFoundGET(t *testing.T) {
@@ -173,6 +180,71 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	if err == nil {
 		t.Fatalf("the json exists in disk and it shouldnt")
 	}
+
+}
+
+func Test_the_swap_functionality(t *testing.T) {
+
+	//delete the content used in the test
+	deleteJsonFromDisk("sequence", "1")
+	deleteJsonFromDisk("sequence", "2")
+	deleteJsonFromDisk("sequence", "3")
+
+	//create an element
+	post("/sequence", "{\"id\":1,\"name\":\"First\"}")
+
+	//create another element (with put that by now is the same as POST)
+	post("/sequence", "{\"id\":2,\"name\":\"Second\"}")
+
+	//check the last element (should be the first)
+	lastElement := lista.Back()
+
+	//check the memory and put the max amount to that value, so the next element creation will purge the LRU (the first element)
+	fmt.Println("Memory: ", memBytes)
+	maxMemBytes = memBytes
+
+	//create the third element
+	post("/sequence", "{\"id\":3,\"name\":\"Third\"}")
+
+	//whait for the swap gorutine to finish
+	sleep()
+
+	//check the last element in the LRU (it should be the second, no the first)
+	lastElement2 := lista.Back()
+	if lastElement == lastElement2 {
+		t.Fatalf("The last element is the same and it shouldnt")
+	}
+
+	//find the "first" element in the map, it should be marked as swapped and the content should be empty
+	cc := collections["sequence"]
+	firstElement := cc.Mapa["1"]
+	if firstElement.Value.(node).Swap == false {
+		t.Fatalf("The node should be marked as swapped")
+	}
+
+	if firstElement.Value.(node).V != nil {
+		t.Fatalf("The node content should be empty")
+	}
+
+	//get the "first" element, and check the value, it should have been taken from disk
+	response := get("/sequence/1")
+
+	//Check the array with only one resource
+	checkContent(t, response, "{\"id\":1,\"name\":\"First\"}")
+
+	//delete the content used in the test
+	deleteJsonFromDisk("sequence", "1")
+	deleteJsonFromDisk("sequence", "2")
+
+	//delete the last element and check if its removed from memory then the not found cache is not enabled
+	cacheNotFound = false
+	deleteElement("sequence", "3")
+	deletedElement := cc.Mapa["3"]
+	if deletedElement != nil {
+		t.Fatalf("The node exists and it shouldnt")
+	}
+
+	cacheNotFound = true
 
 }
 
