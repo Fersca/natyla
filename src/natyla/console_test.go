@@ -1,9 +1,9 @@
 package natyla
 
 import (
+	"fmt"
 	"net"
 	"testing"
-	"fmt"
 	"time"
 )
 
@@ -18,24 +18,24 @@ func (d DummyConn) Write(b []byte) (n int, err error) {
 	if commandNumber == 1 {
 		response := string(b)
 		if response != showHelp() {
-			d.T.Fatalf("Response: '%s' different from expected: '%s'",response, showHelp())
-		}	
+			d.T.Fatalf("Response: '%s' different from expected: '%s'", response, showHelp())
+		}
 	}
 
 	//test if the response was "unknown command"
 	if commandNumber == 2 {
 		response := string(b)
 		if response != "Unknown Command\n" {
-			d.T.Fatalf("Response: '%s' different from expected: '%s'",response, "Unknown Command\n")
-		}	
+			d.T.Fatalf("Response: '%s' different from expected: '%s'", response, "Unknown Command\n")
+		}
 	}
 
 	//test the "elements" command and check if the repsonse is correct
-	if commandNumber == 3 && ready==false {
+	if commandNumber == 3 && ready == false {
 		fmt.Println("Entra una vez")
 		response := string(b)
 		if response != "1" {
-			d.T.Fatalf("Response elements: '%s' different from expected: '%s'",response, "1")
+			d.T.Fatalf("Response elements: '%s' different from expected: '%s'", response, "1")
 		} else {
 			ready = true
 			fmt.Println("Pone true")
@@ -44,10 +44,10 @@ func (d DummyConn) Write(b []byte) (n int, err error) {
 
 	return 50, nil
 }
-func (d DummyConn) Close() error {	
+func (d DummyConn) Close() error {
 	//check if the exit was in the specific command
 	if commandNumber != 4 {
-		d.T.Fatalf("Close connection in an invalid command: %n %s",commandNumber, "expected: 3")
+		d.T.Fatalf("Close connection in an invalid command: %n %s", commandNumber, "expected: 3")
 	}
 	return nil
 }
@@ -74,50 +74,50 @@ var commandNumber int = 0
 func (d DummyConn) Read(b []byte) (n int, err error) {
 
 	//execute the command in the following sequense....
-	
+
 	//increase the sequence
 	commandNumber++
-	fmt.Println("d.Command: ",commandNumber)
-	
+	fmt.Println("d.Command: ", commandNumber)
+
 	//send the "help" command to ses the help screen
-	if commandNumber == 1 { 	
-		return sendCommand("help",b), nil	
+	if commandNumber == 1 {
+		return sendCommand("help", b), nil
 	}
-	
+
 	//test an unknown command
 	if commandNumber == 2 {
-		return sendCommand("pipi",b), nil	
+		return sendCommand("pipi", b), nil
 	}
 
 	//test the "elements" command
 	if commandNumber == 3 {
-	
+
 		//define a json content
 		content := "{\"id\":1,\"name\":\"Grande\"}"
 
 		//delete the previous disk content
 		deleteJsonFromDisk("casa", "1")
-		
+
 		//create the resource
-		responsePost:=post("/casa", content)
-	
+		responsePost := post("/casa", content)
+
 		//check the response conde
 		checkStatus(d.T, responsePost, 201)
- 		
-		return sendCommand("elements casa",b), nil	
+
+		return sendCommand("elements casa", b), nil
 	}
 
-	//exit the telnet 	
-	return sendCommand("exit",b), nil	
-	
+	//exit the telnet
+	return sendCommand("exit", b), nil
+
 }
 
 func sendCommand(content string, b []byte) int {
 	byts := []byte(content)
-	for pos:=0; pos<len(byts);pos++ {
+	for pos := 0; pos < len(byts); pos++ {
 		b[pos] = byts[pos]
-	} 	
-	return len(byts)+2
+	}
+	return len(byts) + 2
 }
 
 //Connects agains the telnet service and send the command

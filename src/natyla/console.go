@@ -45,12 +45,12 @@ func handleTCPConnection(conn net.Conn) {
 	var command []byte = make([]byte, 100)
 
 	for {
-		
+
 		//Read from connection waiting for a command
 		cant, err := conn.Read(command)
 
-		fmt.Println("Command:",string(command))
-				
+		fmt.Println("Command:", string(command))
+
 		if err == nil {
 
 			//read the command and create the string

@@ -109,6 +109,8 @@ Caching
 
 If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.
 
+Telnet Administration
+=====================
 
-
-
+You can manage Natyla by doing a telnet to port 8081. 
+Just type "help" and you will see how to check the memory usage, interact with the resources, etc.
