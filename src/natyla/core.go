@@ -54,12 +54,13 @@ var config map[string]interface{}
 func init() {
 
 	//Welcome Message
+	fmt.Println("------------------------------------------------------------------")
 	fmt.Println("Starting Natyla...")
 
 	//Set the thread quantity based on the number of CPU's
 	coreNum := runtime.NumCPU()
 
-	fmt.Println("Cores number: ", coreNum)
+	fmt.Println("Number of cores: ", coreNum)
 
 	//read the config file
 	readConfig()
@@ -82,8 +83,8 @@ func init() {
 
 	collections = make(map[string]collectionChannel)
 
-	fmt.Println("Ready. Listening on http://localhost:8080")
-	fmt.Println("-------------------------------")
+	fmt.Println("Ready, API Listening on http://localhost:8080, Telnet on port 8081")
+	fmt.Println("------------------------------------------------------------------")
 }
 
 /*

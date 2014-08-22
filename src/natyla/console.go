@@ -170,19 +170,19 @@ func handleTCPConnection(conn net.Conn) {
 			if commandStr[0:4] == "help" {
 				result := showHelp()
 				conn.Write([]byte(result))
-				continue
+				return
 			}
 
 			//Default Message
 			fmt.Println("Comando no definido: ", commandStr)
 			conn.Write([]byte("Unknown Command\n"))
+			return
 
 		} else {
 			fmt.Println("Error: ", err)
+			return
 		}
-
 	}
-
 }
 
 /*
