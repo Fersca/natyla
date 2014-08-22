@@ -181,7 +181,7 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "4")
-	
+
 	//define a json content
 	content1 := "{\"id\":4,\"name\":\"Jimena\"}"
 
@@ -196,37 +196,37 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "4")
-	
+
 	//TODO: check if now it is in the memory and in the LRU
 }
 
 //Get an element that is not in the cache but it is in the disk
 func Test_delete_an_element_that_is_not_in_the_memory(t *testing.T) {
-	
+
 	//search for a resource with equal name
-	response:=deleteReq("/users/5")
+	response := deleteReq("/users/5")
 
 	//check if its returns a not found
 	checkStatus(t, response, 404)
 
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "5")
-	
+
 	//define a json content
 	content1 := "{\"id\":5,\"name\":\"Sabrina\"}"
 
 	//create the file
 	saveJsonToDisk(true, "users", "5", content1)
-		
+
 	//search for the resource
-	response=deleteReq("/users/5")
+	response = deleteReq("/users/5")
 
 	//check if its returns a 404 not found (because the not found is cached but the file is in disk)
 	checkStatus(t, response, 404)
 
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "5")
-	
+
 	//define a json content
 	content1 = "{\"id\":6,\"name\":\"Alejandra\"}"
 
@@ -234,19 +234,18 @@ func Test_delete_an_element_that_is_not_in_the_memory(t *testing.T) {
 	saveJsonToDisk(true, "users", "6", content1)
 
 	//delete the resource that is not in memory but is in the disk
-	response=deleteReq("/users/6")
-	
+	response = deleteReq("/users/6")
+
 	//check if the code is 200 because it was in the disk
 	checkStatus(t, response, 200)
-		
+
 	//check if it is not in the disk any more
 	_, err := readJsonFromDisK("users", "6")
 	if err == nil {
 		t.Fatalf("the json exists in disk and it shouldnt")
 	}
-			
-}
 
+}
 
 ////////////////////// Utility Functions //////////////////////
 
