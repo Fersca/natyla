@@ -201,6 +201,8 @@ func Test_the_swap_functionality(t *testing.T) {
 
 	//check the memory and put the max amount to that value, so the next element creation will purge the LRU (the first element)
 	fmt.Println("Memory: ", memBytes)
+	//store the previous value
+	tempMemory := maxMemBytes
 	maxMemBytes = memBytes
 
 	//create the third element
@@ -245,6 +247,7 @@ func Test_the_swap_functionality(t *testing.T) {
 	}
 
 	cacheNotFound = true
+	maxMemBytes = tempMemory
 
 }
 
