@@ -1,9 +1,3 @@
-Natyla
-======
-![alt tag](https://github.com/Fersca/natyla/blob/master/logoNatyla.png?raw=true)
-
-Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.
-
 Tarvis CI
 [![Build Status](https://travis-ci.org/Fersca/natyla.svg?branch=master)](https://travis-ci.org/Fersca/natyla)
 Drone CI
@@ -11,6 +5,14 @@ Drone CI
 ~~~
 Current Code Coverage: 92.1%
 ~~~
+
+
+Natyla
+======
+![alt tag](https://github.com/Fersca/natyla/blob/master/logoNatyla.png?raw=true)
+
+Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.
+
 
 
 Install and Run
