@@ -1,49 +1,53 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Natyla : Natyla is a Full-Stack API/Cache/Store application to run simple and super-fast APIs in minutes. Written in Golang, provides all the features that you need for a REST-API.">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-    <title>Natyla</title>
+    <title>Natyla - Startup&#39;s Best Friend by Fersca</title>
   </head>
 
   <body>
+    <header>
+      <div class="inner">
+        <h1>Natyla - Startup&#39;s Best Friend</h1>
+        <h2>Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a API multithreaded application running with Memcached and MongoDB.</h2>
+        <a href="https://github.com/Fersca/natyla" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/Fersca/natyla">View on GitHub</a>
-
-          <h1 id="project_title">Natyla</h1>
-          <h2 id="project_tagline">Natyla is a Full-Stack API/Cache/Store application to run simple and super-fast APIs in minutes. Written in Golang, provides all the features that you need for a REST-API.</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/Fersca/natyla/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/Fersca/natyla/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>
-<a name="natyla" class="anchor" href="#natyla"><span class="octicon octicon-link"></span></a>Natyla</h1>
-
-<p><a href="https://travis-ci.org/Fersca/natyla"><img src="https://travis-ci.org/Fersca/natyla.svg?branch=master" alt="Build Status"></a></p>
-
-<p>Natyla is a Full-Stack REST-API/Cache/Key-Value-Store application to configure and run simple APIs in minutes. Written in Golang, it provides the same functionality as a multithreaded application running with Memcached and MongoDB.</p>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><img src="https://github.com/Fersca/natyla/blob/master/logoNatyla.png?raw=true" alt="alt tag"></p>
 
 <h1>
-<a name="install-and-run" class="anchor" href="#install-and-run"><span class="octicon octicon-link"></span></a>Install and Run</h1>
+<a id="need-to-create-an-api-in-3-minutes-" class="anchor" href="#need-to-create-an-api-in-3-minutes-" aria-hidden="true"><span class="octicon octicon-link"></span></a>Need to create an API in 3 minutes? </h1>
 
-<p>Just install <a href="http://golang.org/">golang</a> and run:</p>
+<ol>
+<li>Download natyla.</li>
+<li>Start it.</li>
+<li>POST your information in JSON format.</li>
+<li>Share the resource URL.</li>
+<li>Done. Be Happy :)</li>
+</ol>
 
-<pre><code>go run natyla.go
+<h1>
+<a id="install-and-run" class="anchor" href="#install-and-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install and Run</h1>
+
+<p>Just clone this repository, install <a href="http://golang.org/">golang</a> and run:</p>
+
+<pre><code>go get
+go run natyla.go
 </code></pre>
 
 <p>It will start Natyla with the default configuration:</p>
@@ -52,7 +56,9 @@
 <li>10MB memory cache.</li>
 <li>"adminToken" as default token for admin access to PUT/POST/DELETE.</li>
 <li>$CURRENT_DIR/data as default directory for storing resources and JSON Objects. </li>
-</ul><pre><code>Starting Natyla...
+</ul>
+
+<pre><code>Starting Natyla...
 Core numbers:  4
 Can't found 'config.json' using default parameters
 Using Config: map[token:adminToken memory:10485760]
@@ -62,7 +68,7 @@ Ready.
 </code></pre>
 
 <h1>
-<a name="custom-config" class="anchor" href="#custom-config"><span class="octicon octicon-link"></span></a>Custom Config</h1>
+<a id="custom-config" class="anchor" href="#custom-config" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom Config</h1>
 
 <p>You can create (or download the example) a config file called config.json, where you can setup a custom configuration.</p>
 
@@ -75,7 +81,7 @@ Ready.
 </code></pre>
 
 <h1>
-<a name="using-natyla-restful-api" class="anchor" href="#using-natyla-restful-api"><span class="octicon octicon-link"></span></a>Using Natyla RESTful API</h1>
+<a id="using-natyla-restful-api" class="anchor" href="#using-natyla-restful-api" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using Natyla RESTful API</h1>
 
 <p>Natyla provides a RESTful API to read, update and store JSON resources.</p>
 
@@ -88,7 +94,7 @@ Ready.
 
 <p>If you want to read a resource, just call the API with the resource ID:</p>
 
-<pre><code>curl -X POST localhost:8080/Person/123456
+<pre><code>curl localhost:8080/Person/123456
 </code></pre>
 
 <p>You will get the Stored JSON:</p>
@@ -107,22 +113,78 @@ The previous example will save the JSON (in plain text) in the following file: <
 <pre><code>curl -X DELETE localhost:8080/Person/123456
 </code></pre>
 
+<p><strong>TODO:</strong> 
+Multiget: In the near future you will be able to request several recources at the same time. Eg:</p>
+
+<pre><code>curl localhost:8080/Person?ids=123456,789101
+</code></pre>
+
+<p>You will receive:</p>
+
+<pre><code>[{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"},{"id":789101,"name":"Norbert", "age":57,"profession":"engineer"}]
+</code></pre>
+
 <h1>
-<a name="caching" class="anchor" href="#caching"><span class="octicon octicon-link"></span></a>Caching</h1>
+<a id="searching" class="anchor" href="#searching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Searching</h1>
+
+<p>If you want to search for a particular value in a resource field, you should use the "search" feature from Natyla.</p>
+
+<p>E.g: If you want to search for all the "engineers" in the "Person" resource, just call:</p>
+
+<pre><code>curl localhost:8080/Person/search?field=profession&amp;equal=engineer
+</code></pre>
+
+<p>And you will get an array of resources that satisfy the query</p>
+
+<pre><code>[{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}]
+</code></pre>
+
+<p><strong>TODO:</strong>
+In the near future you will be able to do "like", "or", "greater than", etc operations on several fields</p>
+
+<h1>
+<a id="caching" class="anchor" href="#caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caching</h1>
 
 <p>If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.</p>
-      </section>
+
+<h1>
+<a id="formatting" class="anchor" href="#formatting" aria-hidden="true"><span class="octicon octicon-link"></span></a>Formatting</h1>
+
+<p>Natyla provides a pretty printing format if you call any url from a browser in order to allow your external deverlopers to interact with your API resources in a friendly way :)</p>
+
+<h1>
+<a id="notifications" class="anchor" href="#notifications" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notifications</h1>
+
+<p><strong>TODO:</strong>
+Natyla is not providing a notification system by now, but it will. 
+The idea is the following: If you want to be notified for each resource change, you will be able to register your callback URL and Natyla will notify you with a JSON POST. 
+The second notification system will able you to listen to a socket stream and receive the same notifications while you are connected to the channel.</p>
+
+<h1>
+<a id="telnet-administration" class="anchor" href="#telnet-administration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Telnet Administration</h1>
+
+<p>You can manage Natyla by doing a telnet to port 8081. 
+Just type "help" and you will see how to check the memory usage, interact with the resources, etc.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/Fersca/natyla/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/Fersca/natyla/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/Fersca/natyla"></a> is maintained by <a href="https://github.com/Fersca">Fersca</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Natyla maintained by <a href="https://github.com/Fersca">Fersca</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-              <script type="text/javascript">
+            <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
@@ -132,7 +194,6 @@ The previous example will save the JSON (in plain text) in the following file: <
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
-
 
   </body>
 </html>
