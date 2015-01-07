@@ -7,7 +7,7 @@ Current Code Coverage: 89%
 ~~~
 
 
-Natyla
+Natyla - Startup's Best Friend :)
 ======
 ![alt tag](https://github.com/Fersca/natyla/blob/master/logoNatyla.png?raw=true)
 
@@ -135,7 +135,7 @@ Natyla provides a pretty printing format if you call any url from a browser in o
 Notifications
 =============
 
-TODO: 
+**TODO:**
 Natyla is not providing a notification system by now, but it will. 
 The idea is the following: If you want to be notified for each resource change, you will be able to register your callback URL and Natyla will notify you with a JSON POST. 
 The second notification system will able you to listen to a socket stream and receive the same notifications while you are connected to the channel.
