@@ -35,7 +35,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 	headerMap := w.Header()
 	//Add the new headers
 	headerMap.Add("System", "Natyla 1.0")
-	//PrintInformation
+	//Print Information
 	printRequest(req)
 
 	//get the resources from url
@@ -65,17 +65,16 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 				w.WriteHeader(500)
 				return
 			}
-			w.Write(result)
+      render(result,w,req)
 			return
 		}
 
-		//Get the vale from the cache
+		//Get the value from the cache
 		element, err := getElement(comandos[0], comandos[1])
 
 		if element != nil {
 			//Write the response to the client
-			headerMap.Add("Content-Type", "application/json")
-			w.Write([]byte(element))
+      render(element,w,req)
 		} else {
 			if err == nil {
 				//Return a not-found
@@ -147,5 +146,60 @@ func printRequest(req *http.Request) {
 		fmt.Println("Method: ", req.Method)
 		fmt.Println("URL: ", req.URL)
 		fmt.Println("Headers: ", req.Header)
+    fmt.Println("Accept HTML:", acceptHtml(req))
+
 	}
+}
+
+/*
+ * Render the json output based on the accept header
+ */
+func render(element []byte, w http.ResponseWriter, req *http.Request) {
+
+  //Get the headers map
+  headerMap := w.Header()
+
+  if acceptHtml(req) {
+    prettyContent , err := readPrettyTemplate() //TODO: Cache this html in a variable
+    if err!=nil {
+    } else {
+      headerMap.Add("Content-Type", "application/json")
+      w.Write([]byte(element))
+      fmt.Println(prettyContent)
+      //headerMap.Add("Content-Type", "text/html")
+      //w.Write([]byte(strings.Replace(string(prettyContent),"##ELEMENT##",string(element),-1)))
+      return
+    }
+
+  } else {
+    //Add the new headers
+    headerMap.Add("Content-Type", "application/json")
+    w.Write([]byte(element))
+  }
+
+}
+
+/*
+ * Check if the request accept html as return type
+ */
+func acceptHtml(req *http.Request) bool {
+  if req.Header["Accept"]!=nil {
+    return contains(strings.Split(req.Header["Accept"][0],","),"text/html")
+  } else {
+    return false
+  }
+}
+
+/*
+ *Check is the slide contains a text
+ */
+func contains(s []string, e string) bool {
+
+  for _,a := range s {
+    if a == e {
+      return true
+    }
+  }
+
+  return false
 }

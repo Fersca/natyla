@@ -77,3 +77,11 @@ func readConfig() {
 	fmt.Println("Using Config:", config)
 
 }
+
+/*
+ * Read pretty print html from disk
+ */
+func readPrettyTemplate() ([]byte, error) {
+  content, err := ioutil.ReadFile("pretty.html")
+  return content, err
+}
