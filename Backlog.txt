@@ -4,7 +4,6 @@ Natyla Backlog
 PENDING
 -------
 
-- JSON pretty format when API call is coming from a browser [easy]
 - HTTP push notifications to subscribed clients, with retry [medium]
 - Notification stream throw TCP port [medium]
 - Resource Structure validation [medium]
