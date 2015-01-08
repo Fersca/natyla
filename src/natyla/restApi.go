@@ -65,7 +65,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 				w.WriteHeader(500)
 				return
 			}
-      render(result,w,req)
+			render(result, w, req)
 			return
 		}
 
@@ -74,7 +74,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 		if element != nil {
 			//Write the response to the client
-      render(element,w,req)
+			render(element, w, req)
 		} else {
 			if err == nil {
 				//Return a not-found
@@ -146,7 +146,7 @@ func printRequest(req *http.Request) {
 		fmt.Println("Method: ", req.Method)
 		fmt.Println("URL: ", req.URL)
 		fmt.Println("Headers: ", req.Header)
-    fmt.Println("Accept HTML:", acceptHtml(req))
+		fmt.Println("Accept HTML:", acceptHtml(req))
 
 	}
 }
@@ -156,26 +156,18 @@ func printRequest(req *http.Request) {
  */
 func render(element []byte, w http.ResponseWriter, req *http.Request) {
 
-  //Get the headers map
-  headerMap := w.Header()
+	//Get the headers map
+	headerMap := w.Header()
 
-  if acceptHtml(req) {
-    prettyContent , err := readPrettyTemplate() //TODO: Cache this html in a variable
-    if err!=nil {
-    } else {
-      headerMap.Add("Content-Type", "application/json")
-      w.Write([]byte(element))
-      fmt.Println(prettyContent)
-      //headerMap.Add("Content-Type", "text/html")
-      //w.Write([]byte(strings.Replace(string(prettyContent),"##ELEMENT##",string(element),-1)))
-      return
-    }
-
-  } else {
-    //Add the new headers
-    headerMap.Add("Content-Type", "application/json")
-    w.Write([]byte(element))
-  }
+	if acceptHtml(req) {
+		prettyContent := readPrettyTemplate()
+		headerMap.Add("Content-Type", "text/html")
+		w.Write([]byte(strings.Replace(string(prettyContent), "##ELEMENT##", string(element), -1)))
+	} else {
+		//Add the new headers
+		headerMap.Add("Content-Type", "application/json")
+		w.Write([]byte(element))
+	}
 
 }
 
@@ -183,11 +175,11 @@ func render(element []byte, w http.ResponseWriter, req *http.Request) {
  * Check if the request accept html as return type
  */
 func acceptHtml(req *http.Request) bool {
-  if req.Header["Accept"]!=nil {
-    return contains(strings.Split(req.Header["Accept"][0],","),"text/html")
-  } else {
-    return false
-  }
+	if req.Header["Accept"] != nil {
+		return contains(strings.Split(req.Header["Accept"][0], ","), "text/html")
+	} else {
+		return false
+	}
 }
 
 /*
@@ -195,11 +187,11 @@ func acceptHtml(req *http.Request) bool {
  */
 func contains(s []string, e string) bool {
 
-  for _,a := range s {
-    if a == e {
-      return true
-    }
-  }
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
 
-  return false
+	return false
 }

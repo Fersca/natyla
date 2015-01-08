@@ -42,7 +42,7 @@ var lisChan chan int
 var collectionChan chan int
 
 //Print information
-const enablePrint bool = true
+const enablePrint bool = false
 
 //Create the map that stores the list of collections
 var collections map[string]collectionChannel
@@ -429,7 +429,6 @@ func deleteElement(col string, clave string) bool {
 	} else {
 
 		fmt.Println("Delete element not in memory, ID: ", clave)
-		//TODO: terminar esto
 
 		//Create a new element with the key in the cache, to save a not-found if it is enable
 		createElement(col, clave, "", false, true)

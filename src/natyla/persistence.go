@@ -78,10 +78,24 @@ func readConfig() {
 
 }
 
+//Hold the html template
+var template []byte
+
 /*
  * Read pretty print html from disk
  */
-func readPrettyTemplate() ([]byte, error) {
-  content, err := ioutil.ReadFile("pretty.html")
-  return content, err
+func readPrettyTemplate() []byte {
+	if template != nil {
+		return template
+	} else {
+		//get the template from disk
+		content, err := ioutil.ReadFile("pretty.html")
+		if err != nil {
+			//in case of error return a simple template
+			template = []byte("<html><body><b>##ELEMENT##</b></body></html>")
+		} else {
+			template = content
+		}
+		return content
+	}
 }
