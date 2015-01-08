@@ -8,6 +8,7 @@ PENDING
 - Notification stream throw TCP port [medium]
 - Resource Structure validation [medium]
 - Master/Slave replication [hard]
+- Excel importer tool [medium]
 - WEB console administration [hard]
 - Synchronization in accessing channels and maps (check) [easy]
 - MongoDB export utility [hard]

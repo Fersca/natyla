@@ -7,7 +7,7 @@ Current Code Coverage: 89%
 ~~~
 
 
-Natyla
+Natyla - Startup's Best Friend :)
 ======
 ![alt tag](https://github.com/Fersca/natyla/blob/master/logoNatyla.png?raw=true)
 
@@ -127,10 +127,15 @@ Caching
 
 If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.
 
+Formatting
+==========
+
+Natyla provides a pretty printing format if you call any url from a browser in order to allow your external deverlopers to interact with your API resources in a friendly way :)
+
 Notifications
 =============
 
-TODO: 
+**TODO:**
 Natyla is not providing a notification system by now, but it will. 
 The idea is the following: If you want to be notified for each resource change, you will be able to register your callback URL and Natyla will notify you with a JSON POST. 
 The second notification system will able you to listen to a socket stream and receive the same notifications while you are connected to the channel.
