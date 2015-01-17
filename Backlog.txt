@@ -18,6 +18,7 @@ PENDING
 DONE
 ----
 
+- Custom port for API and Telnet Console, fix to authorization token - DONE - Jan/17/2015 - Fersca
 - JSON pretty format when API call is coming from a browser [easy] - DONE - Jan/7/2015 - Fersca
 - Load Config from file
 - Management console throw telnet
