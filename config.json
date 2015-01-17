@@ -1,5 +1,7 @@
 {
-  "token":"fernando",
+  "token":"",
   "memory":10485760,
-  "data_dir":"dataDir"
+  "data_dir":"dataDir",
+  "api_port":"8080",
+  "telnet_port":"8081"
 }

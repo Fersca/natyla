@@ -42,7 +42,7 @@ var lisChan chan int
 var collectionChan chan int
 
 //Print information
-const enablePrint bool = false
+const enablePrint bool = true
 
 //Create the map that stores the list of collections
 var collections map[string]collectionChannel

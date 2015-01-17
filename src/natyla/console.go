@@ -19,7 +19,7 @@ import (
  */
 func console() {
 
-	ln, err := net.Listen("tcp", ":8081")
+	ln, err := net.Listen("tcp", ":"+config["telnet_port"].(string))
 	if err != nil {
 		// handle error
 	}

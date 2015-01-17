@@ -15,7 +15,7 @@ import (
 func restAPI() {
 	//Create the webserver
 	http.Handle("/", http.HandlerFunc(processRequest))
-	err := http.ListenAndServe("0.0.0.0:8080", nil)
+	err := http.ListenAndServe("0.0.0.0:"+config["api_port"].(string), nil)
 	if err != nil {
 		fmt.Printf("Natyla ListenAndServe Error", err)
 	}
@@ -88,6 +88,32 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 	case "PUT":
 		fallthrough
 	case "POST":
+
+		//Check if you have a valid token
+		if config["token"] != nil && config["token"] != "" {
+
+			//Get the params from the querystring
+			params := strings.Split(req.RequestURI, "?")
+
+			if len(params) > 1 {
+
+				//Split the params
+				params := strings.Split(params[1], "&")
+
+				//Get the token parameter value
+				token := getParamValue(params, "token")
+
+				//Compare the token value with the token in the config
+				//if it is not the same token, return a forbidden response
+				if token != strings.ToLower(config["token"].(string)) {
+					headerMap.Add("Unauthorized", "You need to have a valid token")
+					w.WriteHeader(401)
+					return
+				}
+			}
+
+		}
+
 		//Create the array to hold the body
 		var p []byte = make([]byte, req.ContentLength)
 
@@ -107,7 +133,6 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 				w.WriteHeader(500)
 			}
 		} else {
-			//headerMap.Add("element_id",strconv.Itoa(id))
 			headerMap.Add("location", comandos[0]+"/"+id)
 			//Response the 201 - created to the client
 			w.WriteHeader(201)
@@ -115,7 +140,6 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	case "DELETE":
 		//Get the vale from the cache
-		//result := deleteElement(comandos[0],atoi(comandos[1]))
 		result := deleteElement(comandos[0], comandos[1])
 		if result == false {
 			//Return a not-found
@@ -145,6 +169,7 @@ func printRequest(req *http.Request) {
 		fmt.Println("-------------------")
 		fmt.Println("Method: ", req.Method)
 		fmt.Println("URL: ", req.URL)
+		fmt.Println("Params: ", req.RequestURI)
 		fmt.Println("Headers: ", req.Header)
 		fmt.Println("Accept HTML:", acceptHtml(req))
 
@@ -194,4 +219,19 @@ func contains(s []string, e string) bool {
 	}
 
 	return false
+}
+
+/*
+ *Get the value for the specified param
+ */
+func getParamValue(s []string, e string) string {
+
+	for _, a := range s {
+		values := strings.Split(a, "=")
+		if strings.ToLower(values[0]) == strings.ToLower(e) {
+			return strings.ToLower(values[1])
+		}
+	}
+
+	return ""
 }

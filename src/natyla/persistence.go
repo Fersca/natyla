@@ -70,6 +70,8 @@ func readConfig() {
 		var maxMemdefault json.Number = json.Number("10485760")
 		config["memory"] = maxMemdefault
 		config["data_dir"] = "data"
+		config["api_port"] = "8080"
+		config["telnet_port"] = "8081"
 	} else {
 		config, err = convertJsonToMap(string(content))
 	}
