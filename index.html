@@ -77,13 +77,16 @@ Ready.
 <h1>
 <a id="custom-config" class="anchor" href="#custom-config" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom Config</h1>
 
-<p>You can create (or download the example) a config file called config.json, where you can setup a custom configuration.</p>
+<p>You can create (or use the example) a config file called config.json, where you can setup a custom configuration.</p>
 
 <pre><code>{
   "token":"customToken",
   "cache":false,
   "memory":10485760,
-  "data_dir":"myDir"
+  "data_dir":"myDir",
+  "api_port":"8080",
+  "telnet_port":"8081",
+  "print_log":true
 }
 </code></pre>
 
@@ -94,14 +97,14 @@ Ready.
 
 <p>To create a resource (a Person), just POST or PUT the JSON object to the specific resource:</p>
 
-<pre><code>curl -X POST localhost:8080/Person -d '{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}'
+<pre><code>curl -X POST localhost:8080/person -d '{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}'
 </code></pre>
 
 <p><strong>You Always have to provide an "id" field</strong></p>
 
 <p>If you want to read a resource, just call the API with the resource ID:</p>
 
-<pre><code>curl localhost:8080/Person/123456
+<pre><code>curl localhost:8080/person/123456
 </code></pre>
 
 <p>You will get the Stored JSON:</p>
@@ -112,18 +115,18 @@ Ready.
 <p>If you are curious, you will notice that Natyla stored the JSON resource under you "data" directory.
 The previous example will save the JSON (in plain text) in the following file: </p>
 
-<pre><code>data/Person/123456.json
+<pre><code>data/person/123456.json
 </code></pre>
 
-<p>To delete an Object, just delete it indicating the Object ID:</p>
+<p>To delete a resource, just delete it indicating the recource ID:</p>
 
-<pre><code>curl -X DELETE localhost:8080/Person/123456
+<pre><code>curl -X DELETE localhost:8080/person/123456
 </code></pre>
 
 <p><strong>TODO:</strong> 
-Multiget: In the near future you will be able to request several recources at the same time. Eg:</p>
+Multiget: In the near future you will be able to request several resources at the same time. Eg:</p>
 
-<pre><code>curl localhost:8080/Person?ids=123456,789101
+<pre><code>curl localhost:8080/person?ids=123456,789101
 </code></pre>
 
 <p>You will receive:</p>
@@ -134,11 +137,11 @@ Multiget: In the near future you will be able to request several recources at th
 <h1>
 <a id="searching" class="anchor" href="#searching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Searching</h1>
 
-<p>If you want to search for a particular value in a resource field, you should use the "search" feature from Natyla.</p>
+<p>If you want to search for a particular value in a resource field, you should use the "search" feature.</p>
 
 <p>E.g: If you want to search for all the "engineers" in the "Person" resource, just call:</p>
 
-<pre><code>curl localhost:8080/Person/search?field=profession&amp;equal=engineer
+<pre><code>curl localhost:8080/person/search?field=profession&amp;equal=engineer
 </code></pre>
 
 <p>And you will get an array of resources that satisfy the query</p>
@@ -152,19 +155,19 @@ In the near future you will be able to do "like", "or", "greater than", etc oper
 <h1>
 <a id="caching" class="anchor" href="#caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Caching</h1>
 
-<p>If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used Objects. If you reach the max defined amount of memory, Natyla will only cache the object metadata (but not the object content) it prevents for example invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.</p>
+<p>If you keep the caching enabled (default) Natyla will use a 10MB (default) memory cache to store the most used recources. If you reach the max defined amount of memory, Natyla will only cache the resource metadata (but not the resource content) it prevents (for example) invalid disk access for not previously cached DELETES. To disable cache, just add "cache":false in the config file.</p>
 
 <h1>
 <a id="formatting" class="anchor" href="#formatting" aria-hidden="true"><span class="octicon octicon-link"></span></a>Formatting</h1>
 
-<p>Natyla provides a pretty printing format if you call any url from a browser in order to allow your external deverlopers to interact with your API resources in a friendly way :)</p>
+<p>Natyla provides a pretty printing format if you GET any resource from a browser. It allows you to interact with your API resources in a friendly way :)</p>
 
 <h1>
 <a id="notifications" class="anchor" href="#notifications" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notifications</h1>
 
 <p><strong>TODO:</strong>
 Natyla is not providing a notification system by now, but it will. 
-The idea is the following: If you want to be notified for each resource change, you will be able to register your callback URL and Natyla will notify you with a JSON POST. 
+The idea is the following: If you want to be notified when a resource changes, you will be able to register your callback URL and Natyla will notify you with a JSON POST. 
 The second notification system will able you to listen to a socket stream and receive the same notifications while you are connected to the channel.</p>
 
 <h1>
