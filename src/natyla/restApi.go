@@ -92,26 +92,16 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		//Check if you have a valid token
 		if config["token"] != nil && config["token"] != "" {
 
-			//Get the params from the querystring
-			params := strings.Split(req.RequestURI, "?")
+			//Get the sent token
+			token := req.FormValue("access_token")
 
-			if len(params) > 1 {
-
-				//Split the params
-				params := strings.Split(params[1], "&")
-
-				//Get the token parameter value
-				token := getParamValue(params, "token")
-
-				//Compare the token value with the token in the config
-				//if it is not the same token, return a forbidden response
-				if token != strings.ToLower(config["token"].(string)) {
-					headerMap.Add("Unauthorized", "You need to have a valid token")
-					w.WriteHeader(401)
-					return
-				}
+			//Compare the token value with the token in the config
+			//if it is not the same token, return a forbidden response
+			if token == "" || token != strings.ToLower(config["token"].(string)) {
+				headerMap.Add("Unauthorized", "You need to have a valid token")
+				w.WriteHeader(401)
+				return
 			}
-
 		}
 
 		//Create the array to hold the body

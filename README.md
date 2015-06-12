@@ -3,7 +3,7 @@ Tarvis CI
 Drone CI
 [![Build Status](https://drone.io/github.com/Fersca/natyla/status.png)](https://drone.io/github.com/Fersca/natyla/latest)
 ~~~
-Current Code Coverage: 86.3%
+Current Code Coverage: 87.7%
 ~~~
 
 

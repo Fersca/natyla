@@ -19,6 +19,10 @@ RETST API TESTS
 func Test_Start_REST_API_and_Telnet(t *testing.T) {
 	//Only for code coverage because it is not necessary
 	go Start()
+
+	//Set the default token as empty
+	config["token"] = ""
+
 }
 
 //Test if not existing resource return "404 - Not Found"
@@ -73,6 +77,23 @@ func Test_CreateASimpleResourceWithOutId(t *testing.T) {
 
 	//check if natyla responds with 400 created
 	checkStatus(t, response, 400)
+
+}
+
+//tests if we can create a resource with an invalid token
+func Test_Try_To_Create_With_Invalid_Token(t *testing.T) {
+
+	//Set the new value for the token
+	config["token"] = "newTokenExample"
+
+	//create the request
+	response := post("/users", "{\"name\":\"Fernando\"}")
+
+	//check if natyla responds with 401 401 Unauthorized
+	checkStatus(t, response, 401)
+
+	//Restore the precious value
+	config["token"] = ""
 
 }
 
@@ -180,6 +201,34 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	if err == nil {
 		t.Fatalf("the json exists in disk and it shouldnt")
 	}
+
+}
+
+func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
+
+	//Set the new value for the token
+	config["token"] = "test"
+
+	//delete the content from disk if it exists from previous tests
+	deleteJsonFromDisk("users", "1")
+
+	//define a json content
+	content := "{\"id\":1,\"name\":\"Valeria\"}"
+
+	//create the resource
+	responsePost := post("/users?access_token=test", content)
+
+	//sleep for 1 second in order to let the content be saved to disk
+	sleep()
+
+	//check if natyla responds with 201 created
+	checkStatus(t, responsePost, 201)
+
+	//Delete the resource
+	deleteReq("/users/1")
+
+	//Restore the precious value
+	config["token"] = ""
 
 }
 
