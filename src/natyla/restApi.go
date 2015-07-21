@@ -90,18 +90,11 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 	case "POST":
 
 		//Check if you have a valid token
-		if config["token"] != nil && config["token"] != "" {
-
-			//Get the sent token
-			token := req.FormValue("access_token")
-
-			//Compare the token value with the token in the config
-			//if it is not the same token, return a forbidden response
-			if token == "" || token != strings.ToLower(config["token"].(string)) {
-				headerMap.Add("Unauthorized", "You need to have a valid token")
-				w.WriteHeader(401)
-				return
-			}
+		if !authToken(req.FormValue("access_token")) {
+			//If token is invalid return Unauthorized response.
+			headerMap.Add("Unauthorized", "You need to have a valid token")
+			w.WriteHeader(401)
+			return
 		}
 
 		//Create the array to hold the body
@@ -130,6 +123,15 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	case "DELETE":
 		//Get the vale from the cache
+
+		//Check if you have a valid token
+		if !authToken(req.FormValue("access_token")) {
+			//If token is invalid return Unauthorized response.
+			headerMap.Add("Unauthorized", "You need to have a valid token")
+			w.WriteHeader(401)
+			return
+		}
+
 		result := deleteElement(comandos[0], comandos[1])
 		if result == false {
 			//Return a not-found
@@ -147,6 +149,21 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(405)
 	}
 
+}
+
+/*
+ * Verify token is needed and authenticate
+ */
+func authToken(token string) bool {
+
+	if config["token"] != nil && config["token"] != "" {
+		//Compare the token value with the token in the config
+		if token == "" || token != strings.ToLower(config["token"].(string)) {
+			return false
+		}
+	}
+
+	return true
 }
 
 /*
