@@ -56,7 +56,7 @@ func init() {
 	//Welcome Message
 	fmt.Println("------------------------------------------------------------------")
 	fmt.Println("Starting Natyla...")
-	fmt.Println("Version: 1.01")
+	fmt.Println("Version: 1.02")
 
 	//Set the thread quantity based on the number of CPU's
 	coreNum := runtime.NumCPU()
