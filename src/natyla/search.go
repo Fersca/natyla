@@ -8,7 +8,6 @@ package natyla
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 )
 
