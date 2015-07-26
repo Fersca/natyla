@@ -8,6 +8,7 @@ package natyla
 
 import (
 	"encoding/json"
+	"reflect"
 )
 
 /*
@@ -23,9 +24,18 @@ func search(col, key, value string) ([]byte, error) {
 		//TODO: This is absolutely inefficient, I'm creating a new array for each iteration. Fix this.
 		//Is this possible to have something like java ArrayLists  ?
 		nod := v.Value.(node)
-		if nod.V[key] == value {
-			arr = append(arr, nod.V)
-		}
+
+		//Only check if field exists in document
+		if nodeValue, ok := nod.V[key]; ok {
+			//In case field is json.Number conver to string, otherwise check directly.
+			if reflect.TypeOf(nodeValue).String() == "json.Number" {
+				if value == string(nodeValue.(json.Number)) {
+					arr = append(arr, nod.V)
+				} 
+			} else if nodeValue == value {
+				arr = append(arr, nod.V)
+			}
+		}		
 	}
 
 	//Create the Json object
