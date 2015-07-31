@@ -84,6 +84,10 @@ func init() {
 
 	collections = make(map[string]collectionChannel)
 
+	//Read collections from disk
+	nRead := readAllFromDisk()
+	fmt.Println("Read",nRead,"entries from disk")
+
 	fmt.Println("Ready, API Listening on http://localhost:8080, Telnet on port 8081")
 	fmt.Println("------------------------------------------------------------------")
 }

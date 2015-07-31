@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 /*
@@ -78,6 +80,41 @@ func readConfig() {
 
 	fmt.Println("Using Config:", config)
 
+}
+
+/*
+ * Read all files so they are cached.
+ */
+func readAllFromDisk() (nRead uint64) {
+	nRead = 0
+	//Walk through data directory.
+	filepath.Walk(config["data_dir"].(string), func(path string, f os.FileInfo, err error) error {
+		//When we encounter .json file run the algorithm
+		if filepath.Ext(path) == ".json" {
+			//Replace paths so we can work with windows and unix paths
+			splitPath := strings.Split(strings.Replace(path,`\`,`/`,-1), `/`)
+			//Only work with paths conforming to data_dir/collection/id.json
+			if len(splitPath) == 3 {
+				col := splitPath[1]
+				id := splitPath[2]
+
+				content, err := ioutil.ReadFile(path)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					_, err := createElement(col, id, string(content), false, false) // set to not save to disk
+					if err != nil {
+						fmt.Println("Invalid Disk JSON")
+					} else {
+						nRead++
+					}
+				}
+			}
+		}
+		return nil
+	})
+
+	return nRead
 }
 
 //Hold the html template

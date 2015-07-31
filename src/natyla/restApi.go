@@ -56,6 +56,32 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	case "GET":
 
+		//Search advanced. /cars?color:red;owner[]=Natalia;owner[]=Adriana
+		if len(comandos) == 1 {
+			fmt.Println("Search advanced for",comandos,"with",req.URL.Query())
+			collection := comandos[0]
+
+			err := req.ParseForm()
+
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(500)
+				return
+			}
+
+			//query is in req.Form after ParseForm is executed
+			result, err := advancedSearch(collection, req.Form)
+
+			if err != nil {
+				fmt.Println(result)
+				w.WriteHeader(500)
+				return
+			}
+
+			render(result,w,req)
+			return
+		}
+
 		//Serch for the specific field in the collection
 		if comandos[1] == "search" {
 			col := comandos[0]

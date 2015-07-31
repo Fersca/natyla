@@ -53,6 +53,7 @@ func Test_search_a_resource_based_on_a_field(t *testing.T) {
 func TestSearchAResourceWithNumericField(t *testing.T) {
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "2")
+	deleteJsonFromDisk("users", "3")
 
 	//define a json content
 	content1 := `{"age":24,"country":"Argentina","id":2,"name":"Natalia"}`
@@ -77,16 +78,52 @@ func TestSearchAResourceWithNumericField(t *testing.T) {
 	//search for a resource with age 15
 	response = get("/users/search?field=age&equal=15")
 
-	//Check the array with any resource
+	//Check the array with no resource
 	checkContent(t, response, "[]")
 
 	//search for a resource with age as string
 	response = get("/users/search?field=age&equal=two")
 
-	//Check the array with any resource
+	//Check the array with no resource
 	checkContent(t, response, "[]")
 
 	//cleanup
 	deleteJsonFromDisk("users", "2")
 	deleteJsonFromDisk("users", "3")
+}
+
+func TestAdvancedSearch(t *testing.T) {
+	//delete the content from disk if it exists from previous tests
+	deleteJsonFromDisk("users", "2")
+	deleteJsonFromDisk("users", "3")
+
+	//define a json content
+	content1 := `{"age":24,"country":"Argentina","id":2,"name":"Natalia"}`
+	content2 := `{"age":27,"country":"Argentina","id":3,"name":"Adriana"}`
+
+	//create the resource
+	post("/users", content1)
+	post("/users", content2)
+
+	//search for a resource with age 24 named Natalia
+	response := get("/users?age=24;name=Natalia")
+
+	//Check the array with only one resource
+	checkContent(t, response, "["+content1+"]")
+
+	//search for a resource with age 24 named Natalia
+	response = get("/users?age=27;name=Natalia")
+
+	//Check the array with no resource
+	checkContent(t, response, "[]")
+
+	//search for a resource with country Argentina age 27
+	response = get("/users?country=Argentina;age=27")
+
+	//Check the array with no resource
+	checkContent(t, response, "["+content2+"]")
+
+	deleteJsonFromDisk("users", "2")
+	deleteJsonFromDisk("users", "3")
+
 }

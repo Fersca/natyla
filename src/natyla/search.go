@@ -43,3 +43,41 @@ func search(col, key, value string) ([]byte, error) {
 
 	return b, err
 }
+
+
+func advancedSearch(collection string, query map[string][]string) ([]byte, error) 	{
+	arr := make([]interface{}, 0)
+	cc := collections[collection]
+
+	//Get each value from collection
+	for _, valueNode := range cc.Mapa {
+		//Compare fields that are inside query
+		docHasQueryField := false
+		wasMatched := true
+		for toMatchKey, toMatchValues := range query {
+			//With fields in the saved value if they exist
+			if suspect, ok := valueNode.Value.(node).V[toMatchKey]; ok {
+				docHasQueryField = true
+				//If value is json.Number compare as string
+				if reflect.TypeOf(suspect).String() == "json.Number" {
+					//For now compare only the first value from the Match Values array
+					if toMatchValues[0] != string(suspect.(json.Number)) {
+						wasMatched = false
+						break
+					}
+				} else if suspect != toMatchValues[0] {
+					wasMatched = false
+					break
+				}
+			}
+		}
+
+		if docHasQueryField && wasMatched {
+			arr = append(arr, valueNode.Value.(node).V)
+		}
+	}
+
+	b, err := json.Marshal(arr)
+
+	return b, err
+}
