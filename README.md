@@ -1,7 +1,5 @@
 Tarvis CI
 [![Build Status](https://travis-ci.org/Fersca/natyla.svg?branch=master)](https://travis-ci.org/Fersca/natyla)
-Drone CI
-[![Build Status](https://drone.io/github.com/Fersca/natyla/status.png)](https://drone.io/github.com/Fersca/natyla/latest)
 ~~~
 Current Code Coverage: 83.4%
 ~~~
