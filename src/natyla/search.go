@@ -31,11 +31,11 @@ func search(col, key, value string) ([]byte, error) {
 			if reflect.TypeOf(nodeValue).String() == "json.Number" {
 				if value == string(nodeValue.(json.Number)) {
 					arr = append(arr, nod.V)
-				} 
+				}
 			} else if nodeValue == value {
 				arr = append(arr, nod.V)
 			}
-		}		
+		}
 	}
 
 	//Create the Json object
@@ -50,13 +50,31 @@ func advancedSearch(collection string, query map[string][]string) ([]byte, error
 	cc := collections[collection]
 
 	//Get each value from collection
-	for _, valueNode := range cc.Mapa {
+	for key, valueNode := range cc.Mapa {
 		//Compare fields that are inside query
 		docHasQueryField := false
 		wasMatched := true
+
+		element := valueNode.Value.(node)
+		elementValue := make(map[string]interface{})
+
+		if element.Swap == true && element.Deleted == false {
+			b, _ := readJsonFromDisK(collection, key)
+			m, err := convertJsonToMap(string(b))
+
+			if err != nil {
+				continue
+			} else {
+				elementValue = m
+			}
+
+		} else {
+			elementValue = valueNode.Value.(node).V
+		}
+
 		for toMatchKey, toMatchValues := range query {
 			//With fields in the saved value if they exist
-			if suspect, ok := valueNode.Value.(node).V[toMatchKey]; ok {
+			if suspect, ok := elementValue[toMatchKey]; ok {
 				docHasQueryField = true
 				//If value is json.Number compare as string
 				if reflect.TypeOf(suspect).String() == "json.Number" {
