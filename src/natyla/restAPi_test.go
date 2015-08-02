@@ -321,16 +321,14 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 	//delete the content from disk if it exists from previous tests
 	deleteJsonFromDisk("users", "4")
 
-	//Check if now it is in the memory and in the LRU
+	//check if now it is in the memory and in the LRU
 	cc := collections["users"]
 	element := cc.Mapa["4"]
 
-	//if element does not exist do not continue
 	if element == nil {
 		t.Fatalf("Element does not exist in memory")
 	}
 
-	//Check that element was moved to front of LRU
 	firstElement := lista.Front()
 
 	if firstElement == nil {
@@ -340,11 +338,13 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 		t.Fatalf("The element is not the same as the LRU element")
 	}
 
-	//Element should not be marked as Deleted in LRU
+	deleteElement("users", "4")
 	deletedElement := cc.Mapa["4"]
 	if deletedElement.Value.(node).Deleted != true {
 		t.Fatalf("The element has not been marked as deleted")
 	}
+
+
 }
 
 //Get an element that is not in the cache but it is in the disk
