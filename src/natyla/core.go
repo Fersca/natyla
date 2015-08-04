@@ -334,15 +334,14 @@ func purgeLRU() {
 	//Checks the memory limit and decrease it if it's necessary
 	for memBytes > maxMemBytes {
 
+		//Print Message
 		fmt.Println(memBytes, " - ", maxMemBytes)
-
 		fmt.Println("Max memory reached! swapping", memBytes)
-
 		fmt.Println("LRU Elements: ", lista.Len())
 
 		//Get the last element and remove it. Sync is not needed because nothing
 		//happens if the element is moved in the middle of this rutine, at last it will be removed
-		lastElement := lista.Back()
+		var lastElement *list.Element = lista.Back()
 		if lastElement == nil {
 			fmt.Println("Empty LRU")
 			return
@@ -351,13 +350,39 @@ func purgeLRU() {
 		//Remove the element from the LRU
 		deleteElementFromLRU(lastElement)
 
-		//Set element as "S"wapped node
+		//Save the collection and the key in two variables (to use later to update the map)
+		col:=lastElement.Value.(node).col
+		key:=lastElement.Value.(node).key
+
+		//Create a new element as "S"wapped node
 		var swappedNode node
 		swappedNode.V = nil
 		swappedNode.Swap = true
-		lastElement.Value = swappedNode
-		//it would be better to replace the content of the node instead of create a new one
-		//but I cant get it done TODO: try again with more experience :)
+		swappedNode.col = col
+		swappedNode.key = key
+		swappedNode.Deleted = false
+
+		//Replace de MAP content with the new swapped node
+		cc := collections[col]
+		var mapElement *list.Element = cc.Mapa[key]
+
+		(*mapElement).Value = swappedNode
+
+		//NOTE:
+		//-----
+		//it would be better to replace the content of the node direcly when we get the "lastElement"
+		//instead of getting the element from the map and update the value of the element pointer.
+		//
+		//I don't know why but when I replace the content of the  lastElement.Value with the new
+		//swappedNode, and after it I get the element from the MAP, it remains with the the old data
+		//It appears to be happend that the pointer in the map is not the same as in the LRU list.
+		//Thats why I have to look for the element in the map using "col" and "key"
+		//
+		//I will try to fix it in the future saving a pointer to a node intead of the node value
+		//when I create the *list.Element in the createElement function.
+		//It was not happening in the previos verisons of golang.
+		//
+		//TODO: try again with more experience :)
 
 		//Print a purge
 		if enablePrint {

@@ -252,7 +252,7 @@ func Test_the_swap_functionality(t *testing.T) {
 	fmt.Println("Memory: ", memBytes)
 	//store the previous value
 	tempMemory := maxMemBytes
-	maxMemBytes = memBytes
+	maxMemBytes = memBytes + 1
 
 	//create the third element
 	post("/sequence", "{\"id\":3,\"name\":\"Third\"}")
