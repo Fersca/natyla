@@ -1,7 +1,7 @@
 Tarvis CI
 [![Build Status](https://travis-ci.org/Fersca/natyla.svg?branch=master)](https://travis-ci.org/Fersca/natyla)
 ~~~
-Current Code Coverage: 83.4%
+Current Code Coverage: 85.9%
 ~~~
 
 
