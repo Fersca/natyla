@@ -60,10 +60,11 @@ You can create (or use the example) a config file called config.json, where you 
 ~~~
 
 
-Using Natyla RESTful API
-========================
+= Using Natyla RESTful API
 
 Natyla provides a RESTful API to read, update and store JSON resources.
+
+== Create a resource (POST, PUT)
 
 To create a resource (a Person), just POST or PUT the JSON object to the specific resource:
 
@@ -72,6 +73,8 @@ curl -X POST localhost:8080/person -d '{"id":123456,"name":"Ferdinand", "age":32
 ~~~
 
 **You Always have to provide an "id" field**
+
+== Read a resource (GET)
 
 If you want to read a resource, just call the API with the resource ID:
 
@@ -92,7 +95,9 @@ The previous example will save the JSON (in plain text) in the following file:
 data/person/123456.json
 ~~~
 
-To delete a resource, just delete it indicating the Object ID:
+== Delete a resource (DELETE)
+
+To delete a resource, just DELETE it indicating the Object ID:
 
 ~~~
 curl -X DELETE localhost:8080/person/123456
@@ -106,23 +111,50 @@ curl localhost:8080/person?ids=123456,789101
 ~~~
 You will receive:
 ~~~
-[{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"},{"id":789101,"name":"Norbert", "age":57,"profession":"engineer"}]
+[
+  {"id":123456, "name":"Ferdinand", "age":32, "profession":"engineer"},
+  {"id":789101, "name":"Norbert",   "age":57, "profession":"engineer"}
+]
 ~~~
 
 
-Searching
-=========
+== Searching
 
 If you want to search for a particular value in a resource field, you should use the "search" feature from Natyla.
 
-E.g: If you want to search for all the "engineers" in the "Person" resource, just call:
+E.g. Assume you have the following "Person" resources:
 
+~~~
+[
+  {"id":123456, "name":"Ferdinand", "age":32, "profession":"engineer"},
+  {"id":123456, "name":"Andrea",    "age":26, "profession":"designer"},
+  {"id":789012, "name":"Argandas",  "age":25, "profession":"engineer"}
+]
+~~~
+Wich are located on:
+~~~
+localhost:8080/person
+~~~
+And you want to search for all the "engineers" in the "Person" resource, just call:
 ~~~
 curl localhost:8080/person/search?field=profession&equal=engineer
 ~~~
-
+or
+~~~
+curl localhost:8080/person?profession=engineer
+~~~
 And you will get an array of resources that satisfy the query
-
+~~~
+[
+  {"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"},
+  {"id":789012,"name":"Argandas",  "age":25,"profession":"engineer"}
+]
+~~~
+Even you can search multiple fields to refine your search, doing as follow:
+~~~
+curl localhost:8080/person?profession=engineer&age=32
+~~~
+Will return an array of resources that satisfy the query:
 ~~~
 [{"id":123456,"name":"Ferdinand", "age":32,"profession":"engineer"}]
 ~~~
