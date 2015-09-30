@@ -44,7 +44,7 @@ var collectionChan chan int
 //Print information
 const enablePrint bool = true
 
-//Create the map that stores the list of collections
+//Create the map that stores the list of collectionsge
 var collections map[string]collectionChannel
 var config map[string]interface{}
 
@@ -86,7 +86,7 @@ func init() {
 
 	//Read collections from disk
 	nRead := readAllFromDisk()
-	fmt.Println("Read",nRead,"entries from disk")
+	fmt.Println("Read", nRead, "entries from disk")
 
 	fmt.Println("Ready, API Listening on http://localhost:8080, Telnet on port 8081")
 	fmt.Println("------------------------------------------------------------------")
@@ -334,6 +334,9 @@ func purgeLRU() {
 	//Checks the memory limit and decrease it if it's necessary
 	for memBytes > maxMemBytes {
 
+		//sync this procedure
+		lisChan <- 1
+
 		//Print Message
 		fmt.Println(memBytes, " - ", maxMemBytes)
 		fmt.Println("Max memory reached! swapping", memBytes)
@@ -344,6 +347,8 @@ func purgeLRU() {
 		var lastElement *list.Element = lista.Back()
 		if lastElement == nil {
 			fmt.Println("Empty LRU")
+			//unsync
+			<-lisChan
 			return
 		}
 
@@ -351,8 +356,8 @@ func purgeLRU() {
 		deleteElementFromLRU(lastElement)
 
 		//Save the collection and the key in two variables (to use later to update the map)
-		col:=lastElement.Value.(node).col
-		key:=lastElement.Value.(node).key
+		col := lastElement.Value.(node).col
+		key := lastElement.Value.(node).key
 
 		//Create a new element as "S"wapped node
 		var swappedNode node
@@ -388,6 +393,9 @@ func purgeLRU() {
 		if enablePrint {
 			fmt.Println("Purge Done: ", memBytes)
 		}
+
+		//unsync
+		<-lisChan
 	}
 
 }
@@ -446,7 +454,10 @@ func deleteElement(col string, clave string) bool {
 
 		//In both cases, remove the element from the list and from disk in a separated gorutine
 		go func() {
+
+			lisChan <- 1
 			deleteElementFromLRU(elemento)
+			<-lisChan
 
 			deleteJsonFromDisk(col, clave)
 
@@ -486,15 +497,13 @@ func deleteElement(col string, clave string) bool {
 func deleteElementFromLRU(elemento *list.Element) {
 
 	//Decrement the byte counter, decrease the Key * 2 + Value
-	var n node = elemento.Value.(node)
+	var n node = (*elemento).Value.(node)
 
 	b, _ := json.Marshal(n.V)
 	memBytes -= int64(len(b))
 
 	//Delete the element in the LRU List
-	lisChan <- 1
 	lista.Remove(elemento)
-	<-lisChan
 
 	fmt.Println("Dec Bytes: ", len(b))
 
