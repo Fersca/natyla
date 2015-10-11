@@ -210,10 +210,10 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 	config["token"] = "test"
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "1")
+	deleteJsonFromDisk("users", "10")
 
 	//define a json content
-	content := "{\"id\":1,\"name\":\"Valeria\"}"
+	content := "{\"id\":10,\"name\":\"Gilda\"}"
 
 	//create the resource
 	responsePost := post("/users?access_token=test", content)
@@ -224,8 +224,20 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 	//check if natyla responds with 201 created
 	checkStatus(t, responsePost, 201)
 
+	//Delete the resource without token
+	response := deleteReq("/users/10")
+
+	//check the status code, invalid token
+	checkStatus(t, response, 401)
+
 	//Delete the resource
-	deleteReq("/users/1")
+	response = deleteReq("/users/10?access_token=test")
+
+	//check the status code, delete OK
+	checkStatus(t, response, 200)
+
+	//sleep for 1 second in order to let the content be deleted from disk
+	sleep()
 
 	//Restore the precious value
 	config["token"] = ""
@@ -343,7 +355,6 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 	if deletedElement.Value.(node).Deleted != true {
 		t.Fatalf("The element has not been marked as deleted")
 	}
-
 
 }
 

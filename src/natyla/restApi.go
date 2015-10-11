@@ -58,7 +58,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 		//Search advanced. /cars?color:red;owner[]=Natalia;owner[]=Adriana
 		if len(comandos) == 1 {
-			fmt.Println("Search advanced for",comandos,"with",req.URL.Query())
+			fmt.Println("Search advanced for", comandos, "with", req.URL.Query())
 			collection := comandos[0]
 
 			err := req.ParseForm()
@@ -78,7 +78,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			render(result,w,req)
+			render(result, w, req)
 			return
 		}
 
@@ -255,19 +255,4 @@ func contains(s []string, e string) bool {
 	}
 
 	return false
-}
-
-/*
- *Get the value for the specified param
- */
-func getParamValue(s []string, e string) string {
-
-	for _, a := range s {
-		values := strings.Split(a, "=")
-		if strings.ToLower(values[0]) == strings.ToLower(e) {
-			return strings.ToLower(values[1])
-		}
-	}
-
-	return ""
 }
