@@ -161,7 +161,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		}
 
 		//Add the value to the list and get the pointer to the node
-		n := node{m, false, false, col, id}
+		n := node{m, false, false}
 
 		lisChan <- 1
 		elemento = lista.PushFront(n)
@@ -179,8 +179,6 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		var n node
 		n.V = nil
 		n.Deleted = true
-		n.col = col
-		n.key = id
 
 		elemento = &list.Element{Value: n}
 
@@ -355,39 +353,34 @@ func purgeLRU() {
 		//Remove the element from the LRU
 		deleteElementFromLRU(lastElement)
 
-		//Save the collection and the key in two variables (to use later to update the map)
-		col := lastElement.Value.(node).col
-		key := lastElement.Value.(node).key
-
-		//Create a new element as "S"wapped node
 		var swappedNode node
 		swappedNode.V = nil
 		swappedNode.Swap = true
-		swappedNode.col = col
-		swappedNode.key = key
 		swappedNode.Deleted = false
 
-		//Replace de MAP content with the new swapped node
-		cc := collections[col]
-		var mapElement *list.Element = cc.Mapa[key]
+		(*lastElement).Value = swappedNode
 
-		(*mapElement).Value = swappedNode
+		/*
 
-		//NOTE:
-		//-----
-		//it would be better to replace the content of the node direcly when we get the "lastElement"
-		//instead of getting the element from the map and update the value of the element pointer.
-		//
-		//I don't know why but when I replace the content of the  lastElement.Value with the new
-		//swappedNode, and after it I get the element from the MAP, it remains with the the old data
-		//It appears to be happend that the pointer in the map is not the same as in the LRU list.
-		//Thats why I have to look for the element in the map using "col" and "key"
-		//
-		//I will try to fix it in the future saving a pointer to a node intead of the node value
-		//when I create the *list.Element in the createElement function.
-		//It was not happening in the previos verisons of golang.
-		//
-		//TODO: try again with more experience :)
+			//Save the collection and the key in two variables (to use later to update the map
+			col := lastElement.Value.(node).col
+			key := lastElement.Value.(node).key
+
+			//Create a new element as "S"wapped node
+			var swappedNode node
+			swappedNode.V = nil
+			swappedNode.Swap = true
+			swappedNode.col = col
+			swappedNode.key = key
+			swappedNode.Deleted = false
+
+			//Replace de MAP content with the new swapped node
+			cc := collections[col]
+			var mapElement *list.Element = cc.Mapa[key]
+
+			(*mapElement).Value = swappedNode
+
+		*/
 
 		//Print a purge
 		if enablePrint {

@@ -251,6 +251,8 @@ func Test_the_swap_functionality(t *testing.T) {
 	deleteJsonFromDisk("sequence", "2")
 	deleteJsonFromDisk("sequence", "3")
 
+	sleep()
+
 	//create an element
 	post("/sequence", "{\"id\":1,\"name\":\"First\"}")
 
@@ -409,7 +411,7 @@ func Test_delete_an_element_that_is_not_in_the_memory(t *testing.T) {
 
 //Sleep for some seconds
 func sleep() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 }
 
 //check the body content of a response

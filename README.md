@@ -3,7 +3,7 @@
 </div>
 
 ~~~
-Current Code Coverage: 85.9% 
+Current Code Coverage: 85.6% 
 ~~~
 
 # Natyla - Startup's Best Friend :)

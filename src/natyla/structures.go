@@ -15,8 +15,6 @@ type node struct {
 	V       map[string]interface{}
 	Swap    bool
 	Deleted bool
-	col     string
-	key     string
 }
 
 //Holds the relation between the diferent collections of element with the corresponding channel to write it
