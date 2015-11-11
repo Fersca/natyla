@@ -9,15 +9,19 @@ PENDING
 - Resource Structure validation [medium]
 - Master/Slave replication [hard]
 - Excel importer tool [medium]
+- Front-End for Natyla as a Serrvice [hard]
 - WEB console administration [hard]
-- Synchronization in accessing channels and maps (check) [easy]
 - MongoDB export utility [hard]
 - Multiget features (return severals resources IDs in the same request after /resource?ids=X1,X2,X3,etc) [easy]
 - Selection support (return only asked fields: /resource?attributes=nickname, points) [easy]
+- Backend Datastore integration with MongoDB [medium]
+- Backend Datastore integration with Dynamo [medium]
+- Backend Datastore integration with Cassandra [medium]
 
 DONE
 ----
 
+- Synchronization in accessing channels and maps (check) [easy] - DONE - Ago/2015 - Fersca
 - Custom port for API and Telnet Console, fix to authorization token - DONE - Jan/17/2015 - Fersca
 - JSON pretty format when API call is coming from a browser [easy] - DONE - Jan/7/2015 - Fersca
 - Load Config from file
