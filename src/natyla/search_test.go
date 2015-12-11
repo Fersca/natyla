@@ -9,8 +9,8 @@ import (
 func Test_search_a_resource_based_on_a_field(t *testing.T) {
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "2")
-	deleteJsonFromDisk("users", "3")
+	deleteJSONFromDisk("users", "2")
+	deleteJSONFromDisk("users", "3")
 
 	//define a json content
 	content1 := `{"country":"Argentina","id":2,"name":"Natalia"}`
@@ -45,15 +45,15 @@ func Test_search_a_resource_based_on_a_field(t *testing.T) {
 	}
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "2")
-	deleteJsonFromDisk("users", "3")
+	deleteJSONFromDisk("users", "2")
+	deleteJSONFromDisk("users", "3")
 }
 
 //Create resources with numeric fields and performs searches using numbers.
 func TestSearchAResourceWithNumericField(t *testing.T) {
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "2")
-	deleteJsonFromDisk("users", "3")
+	deleteJSONFromDisk("users", "2")
+	deleteJSONFromDisk("users", "3")
 
 	//define a json content
 	content1 := `{"age":24,"country":"Argentina","id":2,"name":"Natalia"}`
@@ -88,14 +88,14 @@ func TestSearchAResourceWithNumericField(t *testing.T) {
 	checkContent(t, response, "[]")
 
 	//cleanup
-	deleteJsonFromDisk("users", "2")
-	deleteJsonFromDisk("users", "3")
+	deleteJSONFromDisk("users", "2")
+	deleteJSONFromDisk("users", "3")
 }
 
 func TestAdvancedSearch(t *testing.T) {
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "2")
-	deleteJsonFromDisk("users", "3")
+	deleteJSONFromDisk("users", "2")
+	deleteJSONFromDisk("users", "3")
 
 	//define a json content
 	content1 := `{"age":24,"country":"Argentina","id":2,"name":"Natalia"}`
@@ -123,7 +123,7 @@ func TestAdvancedSearch(t *testing.T) {
 	//Check the array with no resource
 	checkContent(t, response, "["+content2+"]")
 
-	deleteJsonFromDisk("users", "2")
-	deleteJsonFromDisk("users", "3")
+	deleteJSONFromDisk("users", "2")
+	deleteJSONFromDisk("users", "3")
 
 }

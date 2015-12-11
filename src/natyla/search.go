@@ -23,7 +23,7 @@ func search(col, key, value string) ([]byte, error) {
 	for _, v := range cc.Mapa {
 		//TODO: This is absolutely inefficient, I'm creating a new array for each iteration. Fix this.
 		//Is this possible to have something like java ArrayLists  ?
-		nod := v.Value.(node)
+		nod := v.Value.(*node)
 
 		//Only check if field exists in document
 		if nodeValue, ok := nod.V[key]; ok {
@@ -55,12 +55,12 @@ func advancedSearch(collection string, query map[string][]string) ([]byte, error
 		docHasQueryField := false
 		wasMatched := true
 
-		element := valueNode.Value.(node)
+		element := valueNode.Value.(*node)
 		elementValue := make(map[string]interface{})
 
 		if element.Swap == true && element.Deleted == false {
-			b, _ := readJsonFromDisK(collection, key)
-			m, err := convertJsonToMap(string(b))
+			b, _ := readJSONFromDisK(collection, key)
+			m, err := convertJSONToMap(string(b))
 
 			if err != nil {
 				continue
@@ -69,7 +69,7 @@ func advancedSearch(collection string, query map[string][]string) ([]byte, error
 			}
 
 		} else {
-			elementValue = valueNode.Value.(node).V
+			elementValue = valueNode.Value.(*node).V
 		}
 
 		for toMatchKey, toMatchValues := range query {
@@ -91,7 +91,7 @@ func advancedSearch(collection string, query map[string][]string) ([]byte, error
 		}
 
 		if docHasQueryField && wasMatched {
-			arr = append(arr, valueNode.Value.(node).V)
+			arr = append(arr, valueNode.Value.(*node).V)
 		}
 	}
 

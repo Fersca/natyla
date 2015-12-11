@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"container/list"
 	"time"
 )
 
@@ -97,21 +98,27 @@ func Test_Try_To_Create_With_Invalid_Token(t *testing.T) {
 
 }
 
-//test if we can create a simple json resource and get it
+//test if we can create a simple JSON resource and get it
 func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 
-	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "1")
+	//Clean the list
+	lista = list.New()
 
-	//define a json content
+	//delete the content from disk if it exists from previous tests
+	deleteJSONFromDisk("users", "1")
+
+	//define a JSON content
 	content := "{\"id\":1,\"name\":\"Valeria\"}"
 
+	fmt.Println("membytes: ", memBytes, maxMemBytes)
 	//create the resource
 	responsePost := post("/users", content)
 
 	//sleep for 1 second in order to let the content be saved to disk
 	sleep()
 
+	printList()
+	
 	//check if natyla responds with 201 created
 	checkStatus(t, responsePost, 201)
 
@@ -124,21 +131,25 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	if element == nil {
 		t.Fatalf("Memory element does not exists")
 	}
+	
 	//check the different element flags
-	if element.Value.(node).Deleted == true {
+	if element.Value.(*node).Deleted == true {
 		t.Fatalf("The element is marked as deleted and it shouldnt")
 	}
-	if element.Value.(node).Swap == true {
+	if element.Value.(*node).Swap == true {
 		t.Fatalf("The element is marked as swaped and it shouldnt")
 	}
+	
 	//check the element content in memory
-	json, _ := json.Marshal(element.Value.(node).V)
-	if string(json) != content {
-		t.Fatalf("Non-expected memory content %s, expected %s", string(json), content)
+	JSON, _ := json.Marshal(element.Value.(*node).V)
+	if string(JSON) != content {
+		t.Fatalf("Non-expected memory content %s, expected %s", string(JSON), content)
 	}
 
 	//check if the element is in the LRU and if its the same as the eleent in the cache
+	lisChan <- 1
 	firstElement := lista.Front()
+	<-lisChan
 	if firstElement == nil {
 		t.Fatalf("LRU element does not exists")
 	}
@@ -156,7 +167,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	checkContent(t, response, content)
 
 	//check the disk file
-	diskContent, _ := readJsonFromDisK("users", "1")
+	diskContent, _ := readJSONFromDisK("users", "1")
 
 	//check if the content is the same on the disk
 	if string(diskContent) != content {
@@ -182,24 +193,26 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 		t.Fatalf("Memory element does not exists")
 	}
 	//check the different element flags
-	if delElement.Value.(node).Deleted == false {
+	if delElement.Value.(*node).Deleted == false {
 		t.Fatalf("The element is not marked as deleted and it shouldnt")
 	}
 	//check the nil value
-	if delElement.Value.(node).V != nil {
+	if delElement.Value.(*node).V != nil {
 		t.Fatalf("The element Value is not nit and it should")
 	}
 
 	//check if it is not in the LRU any more
+	lisChan <- 1
 	firstElement = lista.Front()
+	<-lisChan
 	if firstElement == delElement {
 		t.Fatalf("The element is the same as the first, its wrong")
 	}
 
 	//check if it is not in the disk any more
-	_, err := readJsonFromDisK("users", "1")
+	_, err := readJSONFromDisK("users", "1")
 	if err == nil {
-		t.Fatalf("the json exists in disk and it shouldnt")
+		t.Fatalf("the JSON exists in disk and it shouldnt")
 	}
 
 }
@@ -210,9 +223,9 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 	config["token"] = "test"
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "10")
+	deleteJSONFromDisk("users", "10")
 
-	//define a json content
+	//define a JSON content
 	content := "{\"id\":10,\"name\":\"Gilda\"}"
 
 	//create the resource
@@ -244,12 +257,38 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 
 }
 
+func printList(){
+	
+	fmt.Println("******************************************************************************")
+	fmt.Println("********************   LISTA                  ********************************")
+	fmt.Println("******************************************************************************")
+	f := lista.Front()
+	b := lista.Back()
+	fmt.Println("Frente: ", f)
+	fmt.Println("Back  : ", b)
+	e := lista.Front()
+	
+	for;e!=nil; {
+		n := e.Value.(*node)
+		prev := e.Prev()
+		next := e.Next()
+		fmt.Println("nodo: ",n, "prev: ",prev, ", next: ", next)
+		e = e.Next()		
+	}		
+	fmt.Println("******************************************************************************")
+	
+}
 func Test_the_swap_functionality(t *testing.T) {
 
+	//Clean the list
+	lista = list.New()
+	
+	//printList()
+	
 	//delete the content used in the test
-	deleteJsonFromDisk("sequence", "1")
-	deleteJsonFromDisk("sequence", "2")
-	deleteJsonFromDisk("sequence", "3")
+	deleteJSONFromDisk("sequence", "1")
+	deleteJSONFromDisk("sequence", "2")
+	deleteJSONFromDisk("sequence", "3")
 
 	sleep()
 
@@ -259,35 +298,59 @@ func Test_the_swap_functionality(t *testing.T) {
 	//create another element (with put that by now is the same as POST)
 	post("/sequence", "{\"id\":2,\"name\":\"Second\"}")
 
+	//printList()
+
 	//check the last element (should be the first)
+	lisChan <- 1
 	lastElement := lista.Back()
+	<-lisChan
 
+	n := lastElement.Value.(*node) 
+	if n.V["name"] != "First" {
+		fmt.Println("name: ",n.V["name"])
+		t.Fatalf("The last element is not the first element addded")
+	}
+	
 	//check the memory and put the max amount to that value, so the next element creation will purge the LRU (the first element)
-	fmt.Println("Memory: ", memBytes)
-	//store the previous value
-	tempMemory := maxMemBytes
-	maxMemBytes = memBytes + 1
+	fmt.Println("Memory 1: ", memBytes)
 
+	//whait for the swap gorutine to finish
+	sleep()
+	
+	//store the previous value
+	tempMemory := memBytes
+	memBytes = maxMemBytes
+
+	fmt.Println("Memory 2: ", memBytes)
 	//create the third element
 	post("/sequence", "{\"id\":3,\"name\":\"Third\"}")
 
 	//whait for the swap gorutine to finish
 	sleep()
-
+	
+	//printList()
+	
 	//check the last element in the LRU (it should be the second, no the first)
+	lisChan <- 1
 	lastElement2 := lista.Back()
-	if lastElement == lastElement2 {
-		t.Fatalf("The last element is the same and it shouldnt")
+	<-lisChan
+	
+	n = lastElement2.Value.(*node) 
+	if n.V["name"] != "Second" {
+		fmt.Println("name: ",n.V["name"])
+		//printList()
+		t.Fatalf("The last element is not the second element added")
 	}
 
 	//find the "first" element in the map, it should be marked as swapped and the content should be empty
 	cc := collections["sequence"]
 	firstElement := cc.Mapa["1"]
-	if firstElement.Value.(node).Swap == false {
+	fmt.Println("firstElement: ", firstElement, "address:",&firstElement)
+	if firstElement.Value.(*node).Swap == false {
 		t.Fatalf("The node should be marked as swapped")
 	}
 
-	if firstElement.Value.(node).V != nil {
+	if firstElement.Value.(*node).V != nil {
 		t.Fatalf("The node content should be empty")
 	}
 
@@ -298,8 +361,8 @@ func Test_the_swap_functionality(t *testing.T) {
 	checkContent(t, response, "{\"id\":1,\"name\":\"First\"}")
 
 	//delete the content used in the test
-	deleteJsonFromDisk("sequence", "1")
-	deleteJsonFromDisk("sequence", "2")
+	deleteJSONFromDisk("sequence", "1")
+	deleteJSONFromDisk("sequence", "2")
 
 	//delete the last element and check if its removed from memory then the not found cache is not enabled
 	cacheNotFound = false
@@ -310,21 +373,21 @@ func Test_the_swap_functionality(t *testing.T) {
 	}
 
 	cacheNotFound = true
-	maxMemBytes = tempMemory
-
+	memBytes = tempMemory
+	
 }
 
 //Get an element that is not in the cache but it is in the disk
 func Test_get_element_that_is_only_in_disk(t *testing.T) {
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "4")
+	deleteJSONFromDisk("users", "4")
 
-	//define a json content
+	//define a JSON content
 	content1 := "{\"id\":4,\"name\":\"Jimena\"}"
 
 	//create the file
-	saveJsonToDisk(true, "users", "4", content1)
+	saveJSONToDisk(true, "users", "4", content1)
 
 	//search for a resource with equal name
 	response := get("/users/4")
@@ -333,7 +396,7 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 	checkContent(t, response, content1)
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "4")
+	deleteJSONFromDisk("users", "4")
 
 	//check if now it is in the memory and in the LRU
 	cc := collections["users"]
@@ -342,9 +405,9 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 	if element == nil {
 		t.Fatalf("Element does not exist in memory")
 	}
-
+	lisChan <- 1
 	firstElement := lista.Front()
-
+	<-lisChan
 	if firstElement == nil {
 		t.Fatalf("LRU element does not exists")
 	}
@@ -354,7 +417,7 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 
 	deleteElement("users", "4")
 	deletedElement := cc.Mapa["4"]
-	if deletedElement.Value.(node).Deleted != true {
+	if deletedElement.Value.(*node).Deleted != true {
 		t.Fatalf("The element has not been marked as deleted")
 	}
 
@@ -370,13 +433,13 @@ func Test_delete_an_element_that_is_not_in_the_memory(t *testing.T) {
 	checkStatus(t, response, 404)
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "5")
+	deleteJSONFromDisk("users", "5")
 
-	//define a json content
+	//define a JSON content
 	content1 := "{\"id\":5,\"name\":\"Sabrina\"}"
 
 	//create the file
-	saveJsonToDisk(true, "users", "5", content1)
+	saveJSONToDisk(true, "users", "5", content1)
 
 	//search for the resource
 	response = deleteReq("/users/5")
@@ -385,13 +448,13 @@ func Test_delete_an_element_that_is_not_in_the_memory(t *testing.T) {
 	checkStatus(t, response, 404)
 
 	//delete the content from disk if it exists from previous tests
-	deleteJsonFromDisk("users", "5")
+	deleteJSONFromDisk("users", "5")
 
-	//define a json content
+	//define a JSON content
 	content1 = "{\"id\":6,\"name\":\"Alejandra\"}"
 
 	//create the file
-	saveJsonToDisk(true, "users", "6", content1)
+	saveJSONToDisk(true, "users", "6", content1)
 
 	//delete the resource that is not in memory but is in the disk
 	response = deleteReq("/users/6")
@@ -400,9 +463,9 @@ func Test_delete_an_element_that_is_not_in_the_memory(t *testing.T) {
 	checkStatus(t, response, 200)
 
 	//check if it is not in the disk any more
-	_, err := readJsonFromDisK("users", "6")
+	_, err := readJSONFromDisK("users", "6")
 	if err == nil {
-		t.Fatalf("the json exists in disk and it shouldnt")
+		t.Fatalf("the JSON exists in disk and it shouldnt")
 	}
 
 }
@@ -463,7 +526,7 @@ func head(url string) *httptest.ResponseRecorder {
 func post(url string, content string) *httptest.ResponseRecorder {
 	//create the post request
 	request, _ := http.NewRequest("POST", url, bytes.NewReader([]byte(content)))
-	//add the json header
+	//add the JSON header
 	request.Header.Add("Content-Type", "application/json")
 	response := httptest.NewRecorder()
 

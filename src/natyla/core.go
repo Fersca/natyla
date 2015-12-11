@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
+	"sync/atomic"
 )
 
 //Create the list to support the LRU List
@@ -35,8 +36,11 @@ var memBytes int64 = 0
 //const pointerLen int = 4+8 //Bytes of pointer in 32bits machines plus int64 for the key of element in hashmemBytes
 var cacheNotFound bool = true
 
-//Channes to sync the List, map
+//Channel to sync the List, map
 var lisChan chan int
+
+//Channel to sync the LRU purge
+var LRUChan chan int
 
 //chennel to acces to the collection map
 var collectionChan chan int
@@ -80,6 +84,7 @@ func init() {
 
 	//Create the channels
 	lisChan = make(chan int, 1)
+	LRUChan = make(chan int, 1)
 	collectionChan = make(chan int, 1)
 
 	collections = make(map[string]collectionChannel)
@@ -107,7 +112,7 @@ func Start() {
 /*
  * Convert a Json string to a map
  */
-func convertJsonToMap(valor string) (map[string]interface{}, error) {
+func convertJSONToMap(valor string) (map[string]interface{}, error) {
 
 	//Create the Json element
 	d := json.NewDecoder(strings.NewReader(valor))
@@ -161,7 +166,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		}
 
 		//Add the value to the list and get the pointer to the node
-		n := node{m, false, false}
+		n := &node{m, false, false}
 
 		lisChan <- 1
 		elemento = lista.PushFront(n)
@@ -176,9 +181,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 
 		fmt.Println("Creating node as deleted: ", col, id)
 		//create the node as deleted
-		var n node
-		n.V = nil
-		n.Deleted = true
+		n := &node{nil, false, true}
 
 		elemento = &list.Element{Value: n}
 
@@ -186,7 +189,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 
 	//get the collection-channel relation
 	cc := collections[col]
-	var createDir bool = false
+	createDir := false
 
 	if cc.Mapa == nil {
 
@@ -220,7 +223,9 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		//Increase the memory counter in a diffetet gorutinie, save to disk and purge LRU
 		go func() {
 			//Increments the memory counter (Key + Value in LRU + len of col name, + Key in MAP)
-			memBytes += int64(len(b))
+			fmt.Println("Suma 1: ", int64(len(b)), " --> ", string(b))
+
+			atomic.AddInt64(&memBytes, int64(len(b)))
 
 			if enablePrint {
 				fmt.Println("Inc Bytes: ", memBytes)
@@ -228,7 +233,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 
 			//Save the Json to disk, if it is not already on disk
 			if saveToDisk == true {
-				saveJsonToDisk(createDir, col, id, valor)
+				saveJSONToDisk(createDir, col, id, valor)
 			}
 
 			//Purge de LRU
@@ -254,7 +259,7 @@ func getElement(col string, id string) ([]byte, error) {
 		fmt.Println("Elemento not in memory, reading disk, ID: ", id)
 
 		//read the disk
-		content, er := readJsonFromDisK(col, id)
+		content, er := readJSONFromDisK(col, id)
 
 		//if file doesnt exists cache the not found and return nil
 		if er != nil {
@@ -273,7 +278,7 @@ func getElement(col string, id string) ([]byte, error) {
 	}
 
 	//If the Not-found is cached, return false directely
-	if elemento.Value.(node).Deleted == true {
+	if elemento.Value.(*node).Deleted == true {
 		fmt.Println("Not-Found cached detected on getting, ID: ", id)
 		return nil, nil
 	}
@@ -282,34 +287,32 @@ func getElement(col string, id string) ([]byte, error) {
 	go moveFront(elemento)
 
 	//Check if the element is mark as swapped
-	if elemento.Value.(node).Swap == true {
+	if elemento.Value.(*node).Swap == true {
 
 		//Read the swapped json from disk
-		b, _ := readJsonFromDisK(col, id)
+		b, _ := readJSONFromDisK(col, id)
 
 		//TODO: read if there was an error and do something...
 
-		m, err := convertJsonToMap(string(b))
+		m, err := convertJSONToMap(string(b))
 
 		if err != nil {
 			return nil, err
 		}
 
 		//save the map in the node, mark it as un-swapped
-		var unswappedNode node
-		unswappedNode.V = m
-		unswappedNode.Swap = false
-		elemento.Value = unswappedNode
+		elemento.Value = &node{m, false, false}
 
 		//increase de memory counter
-		memBytes += int64(len(b))
+		fmt.Println("Suma 2: ", int64(len(b)), " --> ", string(b))
+		atomic.AddInt64(&memBytes, int64(len(b)))
 
 		//as we have load content from disk, we have to purge LRU
 		go purgeLRU()
 	}
 
 	//Return the element
-	b, err := json.Marshal(elemento.Value.(node).V)
+	b, err := json.Marshal(elemento.Value.(*node).V)
 	return b, err
 
 }
@@ -329,20 +332,22 @@ func getElements(col string) ([]byte, error) {
  */
 func purgeLRU() {
 
+	LRUChan <- 1
+
 	//Checks the memory limit and decrease it if it's necessary
-	for memBytes > maxMemBytes {
+	for atomic.LoadInt64(&memBytes) > maxMemBytes {
 
 		//sync this procedure
 		lisChan <- 1
 
 		//Print Message
-		fmt.Println(memBytes, " - ", maxMemBytes)
+		fmt.Println(memBytes, " - ", maxMemBytes, "dif: ", memBytes-maxMemBytes)
 		fmt.Println("Max memory reached! swapping", memBytes)
 		fmt.Println("LRU Elements: ", lista.Len())
 
 		//Get the last element and remove it. Sync is not needed because nothing
 		//happens if the element is moved in the middle of this rutine, at last it will be removed
-		var lastElement *list.Element = lista.Back()
+		lastElement := lista.Back()
 		if lastElement == nil {
 			fmt.Println("Empty LRU")
 			//unsync
@@ -353,34 +358,10 @@ func purgeLRU() {
 		//Remove the element from the LRU
 		deleteElementFromLRU(lastElement)
 
-		var swappedNode node
-		swappedNode.V = nil
-		swappedNode.Swap = true
-		swappedNode.Deleted = false
-
-		(*lastElement).Value = swappedNode
-
-		/*
-
-			//Save the collection and the key in two variables (to use later to update the map
-			col := lastElement.Value.(node).col
-			key := lastElement.Value.(node).key
-
-			//Create a new element as "S"wapped node
-			var swappedNode node
-			swappedNode.V = nil
-			swappedNode.Swap = true
-			swappedNode.col = col
-			swappedNode.key = key
-			swappedNode.Deleted = false
-
-			//Replace de MAP content with the new swapped node
-			cc := collections[col]
-			var mapElement *list.Element = cc.Mapa[key]
-
-			(*mapElement).Value = swappedNode
-
-		*/
+		//Mark the node as swapped
+		lastElement.Value.(*node).Deleted = false
+		lastElement.Value.(*node).Swap = true
+		lastElement.Value.(*node).V = nil
 
 		//Print a purge
 		if enablePrint {
@@ -391,6 +372,7 @@ func purgeLRU() {
 		<-lisChan
 	}
 
+	<-LRUChan
 }
 
 /*
@@ -421,7 +403,7 @@ func deleteElement(col string, clave string) bool {
 	if elemento != nil {
 
 		//if it is marked as deleted, return a not-found directly without checking the disk
-		if elemento.Value.(node).Deleted == true {
+		if elemento.Value.(*node).Deleted == true {
 			fmt.Println("Not-Found cached detected on deleting, ID: ", clave)
 			return false
 		}
@@ -432,10 +414,7 @@ func deleteElement(col string, clave string) bool {
 		if cacheNotFound == true {
 
 			//created a new node and asign it to the element
-			var deletedNode node
-			deletedNode.V = nil
-			deletedNode.Deleted = true
-			elemento.Value = deletedNode
+			elemento.Value = &node{nil, false, true}
 			fmt.Println("Caching Not-found for, ID: ", clave)
 
 		} else {
@@ -452,7 +431,7 @@ func deleteElement(col string, clave string) bool {
 			deleteElementFromLRU(elemento)
 			<-lisChan
 
-			deleteJsonFromDisk(col, clave)
+			deleteJSONFromDisk(col, clave)
 
 			//Print message
 			if enablePrint {
@@ -468,16 +447,15 @@ func deleteElement(col string, clave string) bool {
 		createElement(col, clave, "", false, true)
 
 		//Check is the element exist in the disk
-		err := deleteJsonFromDisk(col, clave)
+		err := deleteJSONFromDisk(col, clave)
 
 		//if exists, direcly remove it and return true
 		//if it not exist return false (because it was not found)
 		if err == nil {
 			return true
-		} else {
-			return false
-		}
-
+		} 
+		return false
+		
 	}
 
 	return true
@@ -490,10 +468,13 @@ func deleteElement(col string, clave string) bool {
 func deleteElementFromLRU(elemento *list.Element) {
 
 	//Decrement the byte counter, decrease the Key * 2 + Value
-	var n node = (*elemento).Value.(node)
+	n := (*elemento).Value.(*node)
 
 	b, _ := json.Marshal(n.V)
-	memBytes -= int64(len(b))
+	fmt.Println("b: ", string(b))
+	fmt.Println("Resta: ", int64(len(b)))
+
+	atomic.AddInt64(&memBytes, -int64(len(b)))
 
 	//Delete the element in the LRU List
 	lista.Remove(elemento)

@@ -18,7 +18,7 @@ import (
 /*
  * Save the Json to disk
  */
-func saveJsonToDisk(createDir bool, col, id, valor string) {
+func saveJSONToDisk(createDir bool, col, id, valor string) {
 
 	if createDir {
 		os.Mkdir(config["data_dir"].(string)+"/"+col, 0777)
@@ -33,14 +33,14 @@ func saveJsonToDisk(createDir bool, col, id, valor string) {
 /*
  * Delete the Json from disk
  */
-func deleteJsonFromDisk(col, clave string) error {
+func deleteJSONFromDisk(col, clave string) error {
 	return os.Remove(config["data_dir"].(string) + "/" + col + "/" + clave + ".json")
 }
 
 /*
  * Read the Json from disk
  */
-func readJsonFromDisK(col, clave string) ([]byte, error) {
+func readJSONFromDisK(col, clave string) ([]byte, error) {
 	fmt.Println("Read from disk: ", col, " - ", clave)
 	content, err := ioutil.ReadFile(config["data_dir"].(string) + "/" + col + "/" + clave + ".json")
 	if err != nil {
@@ -69,13 +69,13 @@ func readConfig() {
 		fmt.Println("Can't found 'config.json' using default parameters")
 		config = make(map[string]interface{})
 		config["token"] = "adminToken"
-		var maxMemdefault json.Number = json.Number("10485760")
+		maxMemdefault := json.Number("10485760")
 		config["memory"] = maxMemdefault
 		config["data_dir"] = "data"
 		config["api_port"] = "8080"
 		config["telnet_port"] = "8081"
 	} else {
-		config, err = convertJsonToMap(string(content))
+		config, err = convertJSONToMap(string(content))
 	}
 
 	fmt.Println("Using Config:", config)
@@ -92,7 +92,7 @@ func readAllFromDisk() (nRead uint64) {
 		//When we encounter .json file run the algorithm
 		if filepath.Ext(path) == ".json" {
 			//Replace paths so we can work with windows and unix paths
-			splitPath := strings.Split(strings.Replace(path,`\`,`/`,-1), `/`)
+			splitPath := strings.Split(strings.Replace(path, `\`, `/`, -1), `/`)
 			//Only work with paths conforming to data_dir/collection/id.json
 			if len(splitPath) == 3 {
 				col := splitPath[1]
@@ -126,15 +126,15 @@ var template []byte
 func readPrettyTemplate() []byte {
 	if template != nil {
 		return template
-	} else {
-		//get the template from disk
-		content, err := ioutil.ReadFile("pretty.html")
-		if err != nil {
-			//in case of error return a simple template
-			template = []byte("<html><body><b>##ELEMENT##</b></body></html>")
-		} else {
-			template = content
-		}
-		return content
 	}
+	//get the template from disk
+	content, err := ioutil.ReadFile("pretty.html")
+	if err != nil {
+		//in case of error return a simple template
+		template = []byte("<html><body><b>##ELEMENT##</b></body></html>")
+	} else {
+		template = content
+	}
+	return content
+
 }

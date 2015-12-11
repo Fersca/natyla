@@ -73,7 +73,7 @@ func (d DummyConn) SetWriteDeadline(t time.Time) error {
 }
 
 //variable to hold the sequence of the commands
-var commandNumber int = 0
+var commandNumber int
 
 func (d DummyConn) Read(b []byte) (n int, err error) {
 
@@ -100,7 +100,7 @@ func (d DummyConn) Read(b []byte) (n int, err error) {
 		content := "{\"id\":1,\"name\":\"Grande\"}"
 
 		//delete the previous disk content
-		deleteJsonFromDisk("casa", "1")
+		deleteJSONFromDisk("casa", "1")
 
 		command := "post casa " + content
 

@@ -50,7 +50,7 @@ func handleTCPConnection(conn net.Conn) {
 	fmt.Println("Connection stablished")
 
 	//Create the array to hold the command
-	var command []byte = make([]byte, 100)
+	command := make([]byte, 100)
 
 	for {
 
@@ -62,7 +62,7 @@ func handleTCPConnection(conn net.Conn) {
 		if err == nil {
 
 			//read the command and create the string
-			var commandStr string = string(command)
+			commandStr := string(command)
 
 			//Exit the connection
 			if commandStr[0:4] == "exit" {
@@ -199,7 +199,7 @@ func handleTCPConnection(conn net.Conn) {
  */
 func showHelp() string {
 
-	var help string = "\n\n"
+	help := "\n\n"
 
 	help += "---------------------------------------------------------------\n"
 	help += "Natyla 1.0"
