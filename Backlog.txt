@@ -4,16 +4,18 @@ Natyla Backlog
 PENDING
 -------
 
+General Features
 - HTTP push notifications to subscribed clients, with retry [medium]
 - Notification stream throw TCP port [medium]
 - Resource Structure validation [medium]
-- Master/Slave replication [hard]
 - Excel importer tool [medium]
 - Front-End for Natyla as a Serrvice [hard]
 - WEB console administration [hard]
-- MongoDB export utility [hard]
 - Multiget features (return severals resources IDs in the same request after /resource?ids=X1,X2,X3,etc) [easy]
 - Selection support (return only asked fields: /resource?attributes=nickname, points) [easy]
+
+DataStore Integrations
+- Backend Datastore integration with Redis [medium]
 - Backend Datastore integration with MongoDB [medium]
 - Backend Datastore integration with Dynamo [medium]
 - Backend Datastore integration with Cassandra [medium]
