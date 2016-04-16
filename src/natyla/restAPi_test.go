@@ -22,7 +22,7 @@ func Test_Start_REST_API_and_Telnet(t *testing.T) {
 	go Start()
 
 	//Set the default token as empty
-	config["token"] = ""
+	config["admin_token"] = ""
 
 }
 
@@ -85,7 +85,7 @@ func Test_CreateASimpleResourceWithOutId(t *testing.T) {
 func Test_Try_To_Create_With_Invalid_Token(t *testing.T) {
 
 	//Set the new value for the token
-	config["token"] = "newTokenExample"
+	config["admin_token"] = "newTokenExample"
 
 	//create the request
 	response := post("/users", "{\"name\":\"Fernando\"}")
@@ -94,7 +94,7 @@ func Test_Try_To_Create_With_Invalid_Token(t *testing.T) {
 	checkStatus(t, response, 401)
 
 	//Restore the precious value
-	config["token"] = ""
+	config["admin_token"] = ""
 
 }
 
@@ -220,7 +220,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 
 	//Set the new value for the token
-	config["token"] = "test"
+	config["admin_token"] = "test"
 
 	//delete the content from disk if it exists from previous tests
 	deleteJSONFromDisk("users", "10")
@@ -253,7 +253,7 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 	sleep()
 
 	//Restore the precious value
-	config["token"] = ""
+	config["admin_token"] = ""
 
 }
 

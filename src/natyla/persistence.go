@@ -68,7 +68,7 @@ func readConfig() {
 	if err != nil {
 		fmt.Println("Can't found 'config.json' using default parameters")
 		config = make(map[string]interface{})
-		config["token"] = "adminToken"
+		config["admin_token"] = "adminToken"
 		maxMemdefault := json.Number("10485760")
 		config["memory"] = maxMemdefault
 		config["data_dir"] = "data"

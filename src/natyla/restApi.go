@@ -21,6 +21,8 @@ func restAPI() {
 	err := http.ListenAndServe("0.0.0.0:"+config["api_port"].(string), nil)
 	if err != nil {
 		fmt.Printf("Natyla ListenAndServe Error", err)
+		fmt.Println("popi")
+
 	}
 }
 
@@ -185,9 +187,9 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
  */
 func authToken(token string) bool {
 
-	if config["token"] != nil && config["token"] != "" {
+	if config["admin_token"] != nil && config["admin_token"] != "" {
 		//Compare the token value with the token in the config
-		if token == "" || token != strings.ToLower(config["token"].(string)) {
+		if token == "" || token != strings.ToLower(config["admin_token"].(string)) {
 			return false
 		}
 	}

@@ -50,7 +50,7 @@ Ready.
 You can create (or use the example) a config file called config.json, where you can setup a custom configuration.
 ~~~
 {
-    "token":"customToken",
+    "admin_token":"customToken",
     "cache":false,
     "memory":10485760,
     "data_dir":"myDir",

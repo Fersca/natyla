@@ -1,5 +1,5 @@
 {
-  "token":"",
+  "admin_token":"",
   "memory":10485760,
   "data_dir":"dataDir",
   "api_port":"8080",
