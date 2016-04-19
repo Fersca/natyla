@@ -257,6 +257,103 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 
 }
 
+func Test_Try_To_Create_Custom_Token(t *testing.T) {
+	
+	//delete the content from disk if it exists from previous tests
+	deleteJSONFromDisk("users", "10")
+	deleteJSONFromDisk("users", "11")
+
+	//Set the new value for the token
+	config["admin_token"] = "newTokenExample"
+
+	//create the request
+	response := post("/token", "{\"scope\":\"read-write\"}")
+
+	//check if natyla responds with 401 401 Unauthorized
+	checkStatus(t, response, 401)
+	
+	//create the request with the admin token
+	response = post("/token?access_token=newTokenExample", "{\"scope\":\"read-write\"}")
+
+	//check if natyla responds with 201 created
+	checkStatus(t, response, 201)
+	
+	token := response.Header().Get("location")[6:]
+		
+	if len(token)<5 {
+		t.Fatalf("Error creating token, ", token)
+	} 	
+	
+	//Try to create a resource with invalid custom token
+	content := "{\"id\":10,\"name\":\"Gilda\"}"
+	response = post("/users?access_token=3333333", content)
+
+	//check if natyla responds with 401 401 Unauthorized
+	checkStatus(t, response, 401)
+
+	//Try to create the same resource but with the client token obtained before
+	response = post("/users?access_token="+token, content)
+	
+	//check if natyla responds with 201 created
+	checkStatus(t, response, 201)
+	
+	//Try to create a read-only token, that will be used only for Get resources
+
+	//get the resource with invalid token
+	response = get("/users/10")
+
+	//check if natyla responds with 401
+	checkStatus(t, response, 401)
+	
+	//Check for the correct header
+	checkHeader(t,response,"Unauthorized","You need to have a valid token")
+	
+	//create the request with the admin token, only read only
+	response = post("/token?access_token=newTokenExample", "{\"scope\":\"read-only\"}")
+
+	//check if natyla responds with 201 created
+	checkStatus(t, response, 201)
+	
+	token = response.Header().Get("location")[6:]
+		
+	if len(token)<5 {
+		t.Fatalf("Error creating token, ", token)
+	} 	
+	
+	//get the resource with read only token
+	response = get("/users/10?access_token="+token)
+
+	//check if natyla responds with 200OK with read only token
+	checkStatus(t, response, 200)
+	
+	//try to create a resource with the read only token	
+	content = "{\"id\":11,\"name\":\"Valeria\"}"
+	response = post("/users?access_token="+token, content)
+
+	//check if natyla responds with 401 401 Unauthorized
+	checkStatus(t, response, 401)
+	
+	//Check for the correct header
+	checkHeader(t,response,"Unauthorized","You need to have a read/write token")
+
+	//Now try to delete the resource
+	response = deleteReq("/users?access_token="+token)
+
+	//check if natyla responds with 401 401 Unauthorized
+	checkStatus(t, response, 401)
+	
+	//Check for the correct header
+	checkHeader(t,response,"Unauthorized","You need to have a read/write token")
+	
+	//delete the content from disk if it exists from previous tests
+	deleteJSONFromDisk("users", "10")
+	deleteJSONFromDisk("users", "11")
+	
+	//Restore the precious value
+	config["admin_token"] = ""
+	
+}
+
 func printList(){
 	
 	fmt.Println("******************************************************************************")

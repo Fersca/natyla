@@ -24,6 +24,8 @@ import (
 	"runtime"
 	"strings"
 	"sync/atomic"
+	"math/rand"
+	"time"
 )
 
 //Create the list to support the LRU List
@@ -130,6 +132,31 @@ func convertJSONToMap(valor string) (map[string]interface{}, error) {
 
 }
 
+//Create a token for the specified user
+func createToken(value string) ([]byte, error) {
+		
+	m, err := convertJSONToMap(value)
+	
+	if err!=nil{
+		return nil, err
+	}
+
+	if m["scope"]==nil || !(m["scope"]=="read-only" || m["scope"]=="read-write"){
+		return nil, errors.New("Invalid scope, try with read-only or read-write")
+	} 
+	
+	now := time.Now().UnixNano()
+	
+	r := rand.New(rand.NewSource(now))
+	id := r.Int63()
+	
+	m["id"] = id
+	
+	b, err := json.Marshal(m)
+	
+	return b,err
+}
+
 /*
  * Create the element in the collection
  */
@@ -142,17 +169,11 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 	if deleted == false {
 
 		//Create the Json element
-		d := json.NewDecoder(strings.NewReader(valor))
-		d.UseNumber()
-		var f interface{}
-		err := d.Decode(&f)
+		m, err := convertJSONToMap(valor)
 
 		if err != nil {
 			return "", err
 		}
-
-		//transform it to a map
-		m := f.(map[string]interface{})
 
 		//Checks the data tye of the ID field
 		switch m["id"].(type) {
@@ -453,9 +474,9 @@ func deleteElement(col string, clave string) bool {
 		//if it not exist return false (because it was not found)
 		if err == nil {
 			return true
-		} 
+		}
 		return false
-		
+
 	}
 
 	return true

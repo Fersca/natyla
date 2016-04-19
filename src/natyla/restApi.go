@@ -53,6 +53,16 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	//Get user from acces token	
+	user, scope := authToken(req.FormValue("access_token"))
+
+	if user=="" {
+		//If token is invalid return Unauthorized response.
+		headerMap.Add("Unauthorized", "You need to have a valid token")
+		w.WriteHeader(401)
+		return			
+	}
+	
 	//Performs action based on the request Method
 	switch req.Method {
 
@@ -119,20 +129,30 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 	case "PUT":
 		fallthrough
 	case "POST":
-
-		//Check if you have a valid token
-		if !authToken(req.FormValue("access_token")) {
+	
+		if scope!="read-write" {
 			//If token is invalid return Unauthorized response.
-			headerMap.Add("Unauthorized", "You need to have a valid token")
+			headerMap.Add("Unauthorized", "You need to have a read/write token")
 			w.WriteHeader(401)
-			return
+			return						
 		}
-
+				
 		//Create the array to hold the body
 		var p []byte = make([]byte, req.ContentLength)
-
+		
 		//Reads the body content
 		req.Body.Read(p)
+
+		//Check if it is a token creation request
+		if comandos[0]=="token" {
+			token, tokenErr := createToken(string(p))
+			if tokenErr!= nil {
+				fmt.Println(tokenErr)
+				headerMap.Add("Error", "Error creating token for "+user)
+				w.WriteHeader(500)				
+			}
+			p = token
+		}
 
 		//Save the element in the cache
 		id, err := createElement(comandos[0], "", string(p), true, false)
@@ -153,16 +173,14 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		}
 
 	case "DELETE":
-		//Get the vale from the cache
 
-		//Check if you have a valid token
-		if !authToken(req.FormValue("access_token")) {
+		if scope!="read-write" {
 			//If token is invalid return Unauthorized response.
-			headerMap.Add("Unauthorized", "You need to have a valid token")
+			headerMap.Add("Unauthorized", "You need to have a read/write token")
 			w.WriteHeader(401)
-			return
+			return						
 		}
-
+	
 		result := deleteElement(comandos[0], comandos[1])
 		if result == false {
 			//Return a not-found
@@ -185,16 +203,27 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 /*
  * Verify token is needed and authenticate
  */
-func authToken(token string) bool {
+func authToken(token string) (string, string) {
 
-	if config["admin_token"] != nil && config["admin_token"] != "" {
-		//Compare the token value with the token in the config
-		if token == "" || token != strings.ToLower(config["admin_token"].(string)) {
-			return false
-		}
+	if config["admin_token"]==nil || config["admin_token"]=="" || strings.ToLower(token) == strings.ToLower(config["admin_token"].(string)) {
+		return "admin","read-write"	
+	} 
+
+	if token=="" {
+		return "",""
 	}
+	
+	e,_ := getElement("token",token)
+	
+	if e==nil {
+		return "",""
+	}
+		
+	m,_ := convertJSONToMap(string(e))
+	
+	//TODO: in the future, return the user name, instead of "admin" when natyla hables multiple users		
+	return "admin",m["scope"].(string)
 
-	return true
 }
 
 /*
