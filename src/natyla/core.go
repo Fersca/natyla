@@ -54,6 +54,8 @@ const enablePrint bool = true
 var collections map[string]collectionChannel
 var config map[string]interface{}
 
+const readWrite = "read-write"
+
 /*
  * Init the system variables
  */
@@ -141,7 +143,7 @@ func createToken(value string) ([]byte, error) {
 		return nil, err
 	}
 
-	if m["scope"] == nil || !(m["scope"] == "read-only" || m["scope"] == "read-write") {
+	if m["scope"] == nil || !(m["scope"] == "read-only" || m["scope"] == readWrite) {
 		return nil, errors.New("Invalid scope, try with read-only or read-write")
 	}
 

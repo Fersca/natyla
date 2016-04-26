@@ -131,8 +131,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 	case "PUT":
 		fallthrough
 	case "POST":
-
-		if scope != rw {
+		if scope != readWrite {
 			//If token is invalid return Unauthorized response.
 			headerMap.Add("Unauthorized", "You need to have a read/write token")
 			w.WriteHeader(401)
@@ -175,8 +174,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		}
 
 	case "DELETE":
-
-		if scope != rw {
+		if scope != readWrite {
 			//If token is invalid return Unauthorized response.
 			headerMap.Add("Unauthorized", "You need to have a read/write token")
 			w.WriteHeader(401)
@@ -208,7 +206,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 func authToken(token string) (string, string) {
 
 	if config["admin_token"] == nil || config["admin_token"] == "" || strings.ToLower(token) == strings.ToLower(config["admin_token"].(string)) {
-		return "admin", rw
+		return "admin", readWrite
 	}
 
 	if token == "" {
