@@ -33,10 +33,10 @@ var lista *list.List
 
 //Max byte in memory (Key + Data), today set to 100KB
 var maxMemBytes int64
-var memBytes int64 = 0
+var memBytes int64
 
 //const pointerLen int = 4+8 //Bytes of pointer in 32bits machines plus int64 for the key of element in hashmemBytes
-var cacheNotFound bool = true
+var cacheNotFound = true
 
 //Channel to sync the List, map
 var lisChan chan int
@@ -53,6 +53,8 @@ const enablePrint bool = true
 //Create the map that stores the list of collectionsge
 var collections map[string]collectionChannel
 var config map[string]interface{}
+
+const readWrite = "read-write"
 
 /*
  * Init the system variables
@@ -141,7 +143,7 @@ func createToken(value string) ([]byte, error) {
 		return nil, err
 	}
 
-	if m["scope"] == nil || !(m["scope"] == "read-only" || m["scope"] == "read-write") {
+	if m["scope"] == nil || !(m["scope"] == "read-only" || m["scope"] == readWrite) {
 		return nil, errors.New("Invalid scope, try with read-only or read-write")
 	}
 

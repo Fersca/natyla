@@ -1,9 +1,8 @@
-/*
- * Search Module
- *
- * Manage the search engine on Natyle
- *
- */
+//
+// Search Module
+//
+// Manage the search engine on Natyle
+//
 package natyla
 
 import (

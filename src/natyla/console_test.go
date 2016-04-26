@@ -51,7 +51,7 @@ func (d DummyConn) Write(b []byte) (n int, err error) {
 func (d DummyConn) Close() error {
 	//check if the exit was in the specific command
 	if commandNumber != 11 {
-		d.T.Fatalf("Close connection in an invalid command: %n %s", commandNumber, "expected: 6")
+		d.T.Fatalf("Close connection in an invalid command: %v %s", commandNumber, "expected: 6")
 	}
 	return nil
 }
