@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-const rw = "read-write"
-
 /*
  * Init for testing
  */
