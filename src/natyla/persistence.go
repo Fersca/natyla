@@ -1,9 +1,8 @@
-/*
- * Persistence Module
- *
- * Manage the Disck access to persistence, delete and write the JSON objects
- *
- */
+//
+// Persistence Module
+//
+// Manage the Disck access to persistence, delete and write the JSON objects
+//
 package natyla
 
 import (
@@ -75,7 +74,7 @@ func readConfig() {
 		config["api_port"] = "8080"
 		config["telnet_port"] = "8081"
 	} else {
-		config, err = convertJSONToMap(string(content))
+		config, _ = convertJSONToMap(string(content))
 	}
 
 	fmt.Println("Using Config:", config)

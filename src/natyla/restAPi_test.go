@@ -2,13 +2,13 @@ package natyla
 
 import (
 	"bytes"
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"container/list"
 	"time"
 )
 
@@ -118,7 +118,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	sleep()
 
 	printList()
-	
+
 	//check if natyla responds with 201 created
 	checkStatus(t, responsePost, 201)
 
@@ -131,7 +131,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	if element == nil {
 		t.Fatalf("Memory element does not exists")
 	}
-	
+
 	//check the different element flags
 	if element.Value.(*node).Deleted == true {
 		t.Fatalf("The element is marked as deleted and it shouldnt")
@@ -139,7 +139,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 	if element.Value.(*node).Swap == true {
 		t.Fatalf("The element is marked as swaped and it shouldnt")
 	}
-	
+
 	//check the element content in memory
 	JSON, _ := json.Marshal(element.Value.(*node).V)
 	if string(JSON) != content {
@@ -258,7 +258,7 @@ func Test_Try_To_Create_With_Valid_Token(t *testing.T) {
 }
 
 func Test_Try_To_Create_Custom_Token(t *testing.T) {
-	
+
 	//delete the content from disk if it exists from previous tests
 	deleteJSONFromDisk("users", "10")
 	deleteJSONFromDisk("users", "11")
@@ -271,19 +271,19 @@ func Test_Try_To_Create_Custom_Token(t *testing.T) {
 
 	//check if natyla responds with 401 401 Unauthorized
 	checkStatus(t, response, 401)
-	
+
 	//create the request with the admin token
 	response = post("/token?access_token=newTokenExample", "{\"scope\":\"read-write\"}")
 
 	//check if natyla responds with 201 created
 	checkStatus(t, response, 201)
-	
+
 	token := response.Header().Get("location")[6:]
-		
-	if len(token)<5 {
-		t.Fatalf("Error creating token, ", token)
-	} 	
-	
+
+	if len(token) < 5 {
+		t.Fatal("Error creating token, ", token)
+	}
+
 	//Try to create a resource with invalid custom token
 	content := "{\"id\":10,\"name\":\"Gilda\"}"
 	response = post("/users?access_token=3333333", content)
@@ -293,10 +293,10 @@ func Test_Try_To_Create_Custom_Token(t *testing.T) {
 
 	//Try to create the same resource but with the client token obtained before
 	response = post("/users?access_token="+token, content)
-	
+
 	//check if natyla responds with 201 created
 	checkStatus(t, response, 201)
-	
+
 	//Try to create a read-only token, that will be used only for Get resources
 
 	//get the resource with invalid token
@@ -304,58 +304,58 @@ func Test_Try_To_Create_Custom_Token(t *testing.T) {
 
 	//check if natyla responds with 401
 	checkStatus(t, response, 401)
-	
+
 	//Check for the correct header
-	checkHeader(t,response,"Unauthorized","You need to have a valid token")
-	
+	checkHeader(t, response, "Unauthorized", "You need to have a valid token")
+
 	//create the request with the admin token, only read only
 	response = post("/token?access_token=newTokenExample", "{\"scope\":\"read-only\"}")
 
 	//check if natyla responds with 201 created
 	checkStatus(t, response, 201)
-	
+
 	token = response.Header().Get("location")[6:]
-		
-	if len(token)<5 {
-		t.Fatalf("Error creating token, ", token)
-	} 	
-	
+
+	if len(token) < 5 {
+		t.Fatal("Error creating token, ", token)
+	}
+
 	//get the resource with read only token
-	response = get("/users/10?access_token="+token)
+	response = get("/users/10?access_token=" + token)
 
 	//check if natyla responds with 200OK with read only token
 	checkStatus(t, response, 200)
-	
-	//try to create a resource with the read only token	
+
+	//try to create a resource with the read only token
 	content = "{\"id\":11,\"name\":\"Valeria\"}"
 	response = post("/users?access_token="+token, content)
 
 	//check if natyla responds with 401 401 Unauthorized
 	checkStatus(t, response, 401)
-	
+
 	//Check for the correct header
-	checkHeader(t,response,"Unauthorized","You need to have a read/write token")
+	checkHeader(t, response, "Unauthorized", "You need to have a read/write token")
 
 	//Now try to delete the resource
-	response = deleteReq("/users?access_token="+token)
+	response = deleteReq("/users?access_token=" + token)
 
 	//check if natyla responds with 401 401 Unauthorized
 	checkStatus(t, response, 401)
-	
+
 	//Check for the correct header
-	checkHeader(t,response,"Unauthorized","You need to have a read/write token")
-	
+	checkHeader(t, response, "Unauthorized", "You need to have a read/write token")
+
 	//delete the content from disk if it exists from previous tests
 	deleteJSONFromDisk("users", "10")
 	deleteJSONFromDisk("users", "11")
-	
+
 	//Restore the precious value
 	config["admin_token"] = ""
-	
+
 }
 
-func printList(){
-	
+func printList() {
+
 	fmt.Println("******************************************************************************")
 	fmt.Println("********************   LISTA                  ********************************")
 	fmt.Println("******************************************************************************")
@@ -364,24 +364,24 @@ func printList(){
 	fmt.Println("Frente: ", f)
 	fmt.Println("Back  : ", b)
 	e := lista.Front()
-	
-	for;e!=nil; {
+
+	for e != nil {
 		n := e.Value.(*node)
 		prev := e.Prev()
 		next := e.Next()
-		fmt.Println("nodo: ",n, "prev: ",prev, ", next: ", next)
-		e = e.Next()		
-	}		
+		fmt.Println("nodo: ", n, "prev: ", prev, ", next: ", next)
+		e = e.Next()
+	}
 	fmt.Println("******************************************************************************")
-	
+
 }
 func Test_the_swap_functionality(t *testing.T) {
 
 	//Clean the list
 	lista = list.New()
-	
+
 	//printList()
-	
+
 	//delete the content used in the test
 	deleteJSONFromDisk("sequence", "1")
 	deleteJSONFromDisk("sequence", "2")
@@ -402,18 +402,18 @@ func Test_the_swap_functionality(t *testing.T) {
 	lastElement := lista.Back()
 	<-lisChan
 
-	n := lastElement.Value.(*node) 
+	n := lastElement.Value.(*node)
 	if n.V["name"] != "First" {
-		fmt.Println("name: ",n.V["name"])
+		fmt.Println("name: ", n.V["name"])
 		t.Fatalf("The last element is not the first element addded")
 	}
-	
+
 	//check the memory and put the max amount to that value, so the next element creation will purge the LRU (the first element)
 	fmt.Println("Memory 1: ", memBytes)
 
 	//whait for the swap gorutine to finish
 	sleep()
-	
+
 	//store the previous value
 	tempMemory := memBytes
 	memBytes = maxMemBytes
@@ -424,17 +424,17 @@ func Test_the_swap_functionality(t *testing.T) {
 
 	//whait for the swap gorutine to finish
 	sleep()
-	
+
 	//printList()
-	
+
 	//check the last element in the LRU (it should be the second, no the first)
 	lisChan <- 1
 	lastElement2 := lista.Back()
 	<-lisChan
-	
-	n = lastElement2.Value.(*node) 
+
+	n = lastElement2.Value.(*node)
 	if n.V["name"] != "Second" {
-		fmt.Println("name: ",n.V["name"])
+		fmt.Println("name: ", n.V["name"])
 		//printList()
 		t.Fatalf("The last element is not the second element added")
 	}
@@ -442,7 +442,7 @@ func Test_the_swap_functionality(t *testing.T) {
 	//find the "first" element in the map, it should be marked as swapped and the content should be empty
 	cc := collections["sequence"]
 	firstElement := cc.Mapa["1"]
-	fmt.Println("firstElement: ", firstElement, "address:",&firstElement)
+	fmt.Println("firstElement: ", firstElement, "address:", &firstElement)
 	if firstElement.Value.(*node).Swap == false {
 		t.Fatalf("The node should be marked as swapped")
 	}
@@ -471,7 +471,7 @@ func Test_the_swap_functionality(t *testing.T) {
 
 	cacheNotFound = true
 	memBytes = tempMemory
-	
+
 }
 
 //Get an element that is not in the cache but it is in the disk
