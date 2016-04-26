@@ -1,9 +1,8 @@
-/*
- * Search Module
- *
- * Manage the search engine on Natyle
- *
- */
+//
+// Search Module
+//
+// Manage the search engine on Natyle
+//
 package natyla
 
 import (
@@ -16,7 +15,7 @@ import (
  */
 func search(col, key, value string) ([]byte, error) {
 
-	arr := make([]interface{}, 0)
+	var arr []interface{}
 	cc := collections[col]
 
 	//Search the Map for the value
@@ -45,7 +44,7 @@ func search(col, key, value string) ([]byte, error) {
 }
 
 func advancedSearch(collection string, query map[string][]string) ([]byte, error) {
-	arr := make([]interface{}, 0)
+	var arr []interface{}
 	cc := collections[collection]
 
 	//Get each value from collection

@@ -33,10 +33,10 @@ var lista *list.List
 
 //Max byte in memory (Key + Data), today set to 100KB
 var maxMemBytes int64
-var memBytes int64 = 0
+var memBytes int64
 
 //const pointerLen int = 4+8 //Bytes of pointer in 32bits machines plus int64 for the key of element in hashmemBytes
-var cacheNotFound bool = true
+var cacheNotFound = true
 
 //Channel to sync the List, map
 var lisChan chan int

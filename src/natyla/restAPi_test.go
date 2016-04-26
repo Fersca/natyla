@@ -281,7 +281,7 @@ func Test_Try_To_Create_Custom_Token(t *testing.T) {
 	token := response.Header().Get("location")[6:]
 
 	if len(token) < 5 {
-		t.Fatalf("Error creating token, ", token)
+		t.Fatal("Error creating token, ", token)
 	}
 
 	//Try to create a resource with invalid custom token
@@ -317,7 +317,7 @@ func Test_Try_To_Create_Custom_Token(t *testing.T) {
 	token = response.Header().Get("location")[6:]
 
 	if len(token) < 5 {
-		t.Fatalf("Error creating token, ", token)
+		t.Fatal("Error creating token, ", token)
 	}
 
 	//get the resource with read only token

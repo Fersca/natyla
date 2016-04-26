@@ -1,9 +1,8 @@
-/*
- * Structures Module
- *
- * Structures that Natyla uses internally
- *
- */
+//
+// Structures Module
+//
+// Structures that Natyla uses internally
+//
 package natyla
 
 import (

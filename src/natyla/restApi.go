@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+const rw = "read-write"
+
 /*
  * Init for testing
  */
@@ -20,7 +22,7 @@ func restAPI() {
 	http.Handle("/", http.HandlerFunc(processRequest))
 	err := http.ListenAndServe("0.0.0.0:"+config["api_port"].(string), nil)
 	if err != nil {
-		fmt.Printf("Natyla ListenAndServe Error", err)
+		fmt.Print("Natyla ListenAndServe Error", err)
 		fmt.Println("popi")
 
 	}
@@ -130,7 +132,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		fallthrough
 	case "POST":
 
-		if scope != "read-write" {
+		if scope != rw {
 			//If token is invalid return Unauthorized response.
 			headerMap.Add("Unauthorized", "You need to have a read/write token")
 			w.WriteHeader(401)
@@ -138,7 +140,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		}
 
 		//Create the array to hold the body
-		var p []byte = make([]byte, req.ContentLength)
+		p := make([]byte, req.ContentLength)
 
 		//Reads the body content
 		req.Body.Read(p)
@@ -174,7 +176,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	case "DELETE":
 
-		if scope != "read-write" {
+		if scope != rw {
 			//If token is invalid return Unauthorized response.
 			headerMap.Add("Unauthorized", "You need to have a read/write token")
 			w.WriteHeader(401)
@@ -206,7 +208,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 func authToken(token string) (string, string) {
 
 	if config["admin_token"] == nil || config["admin_token"] == "" || strings.ToLower(token) == strings.ToLower(config["admin_token"].(string)) {
-		return "admin", "read-write"
+		return "admin", rw
 	}
 
 	if token == "" {
@@ -267,11 +269,12 @@ func render(element []byte, w http.ResponseWriter, req *http.Request) {
  * Check if the request accept html as return type
  */
 func acceptHtml(req *http.Request) bool {
+
 	if req.Header["Accept"] != nil {
 		return contains(strings.Split(req.Header["Accept"][0], ","), "text/html")
-	} else {
-		return false
 	}
+
+	return false
 }
 
 /*
