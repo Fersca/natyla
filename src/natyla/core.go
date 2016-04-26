@@ -21,10 +21,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"runtime"
 	"strings"
 	"sync/atomic"
-	"math/rand"
 	"time"
 )
 
@@ -134,27 +134,27 @@ func convertJSONToMap(valor string) (map[string]interface{}, error) {
 
 //Create a token for the specified user
 func createToken(value string) ([]byte, error) {
-		
+
 	m, err := convertJSONToMap(value)
-	
-	if err!=nil{
+
+	if err != nil {
 		return nil, err
 	}
 
-	if m["scope"]==nil || !(m["scope"]=="read-only" || m["scope"]=="read-write"){
+	if m["scope"] == nil || !(m["scope"] == "read-only" || m["scope"] == "read-write") {
 		return nil, errors.New("Invalid scope, try with read-only or read-write")
-	} 
-	
+	}
+
 	now := time.Now().UnixNano()
-	
+
 	r := rand.New(rand.NewSource(now))
 	id := r.Int63()
-	
+
 	m["id"] = id
-	
+
 	b, err := json.Marshal(m)
-	
-	return b,err
+
+	return b, err
 }
 
 /*

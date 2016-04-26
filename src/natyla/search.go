@@ -44,8 +44,7 @@ func search(col, key, value string) ([]byte, error) {
 	return b, err
 }
 
-
-func advancedSearch(collection string, query map[string][]string) ([]byte, error) 	{
+func advancedSearch(collection string, query map[string][]string) ([]byte, error) {
 	arr := make([]interface{}, 0)
 	cc := collections[collection]
 
