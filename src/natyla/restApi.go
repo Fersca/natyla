@@ -1,9 +1,9 @@
-/*
- * API Module
- *
- * Manage the REST API Access to Natyla
- *
- */
+// Package natyla ...
+// API Module
+//
+// Manage the REST API Access to Natyla
+//
+//
 package natyla
 
 import (
@@ -236,7 +236,7 @@ func printRequest(req *http.Request) {
 		fmt.Println("URL: ", req.URL)
 		fmt.Println("Params: ", req.RequestURI)
 		fmt.Println("Headers: ", req.Header)
-		fmt.Println("Accept HTML:", acceptHtml(req))
+		fmt.Println("Accept HTML:", acceptHTML(req))
 
 	}
 }
@@ -249,7 +249,7 @@ func render(element []byte, w http.ResponseWriter, req *http.Request) {
 	//Get the headers map
 	headerMap := w.Header()
 
-	if acceptHtml(req) {
+	if acceptHTML(req) {
 		prettyContent := readPrettyTemplate()
 		headerMap.Add("Content-Type", "text/html")
 		w.Write([]byte(strings.Replace(string(prettyContent), "##ELEMENT##", string(element), -1)))
@@ -264,7 +264,7 @@ func render(element []byte, w http.ResponseWriter, req *http.Request) {
 /*
  * Check if the request accept html as return type
  */
-func acceptHtml(req *http.Request) bool {
+func acceptHTML(req *http.Request) bool {
 
 	if req.Header["Accept"] != nil {
 		return contains(strings.Split(req.Header["Accept"][0], ","), "text/html")

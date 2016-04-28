@@ -102,7 +102,7 @@ func Test_Try_To_Create_With_Invalid_Token(t *testing.T) {
 func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 
 	//Clean the list
-	lista = list.New()
+	lruList = list.New()
 
 	//delete the content from disk if it exists from previous tests
 	deleteJSONFromDisk("users", "1")
@@ -148,7 +148,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 
 	//check if the element is in the LRU and if its the same as the eleent in the cache
 	lisChan <- 1
-	firstElement := lista.Front()
+	firstElement := lruList.Front()
 	<-lisChan
 	if firstElement == nil {
 		t.Fatalf("LRU element does not exists")
@@ -203,7 +203,7 @@ func Test_CreateASimpleResourceAndGetIt(t *testing.T) {
 
 	//check if it is not in the LRU any more
 	lisChan <- 1
-	firstElement = lista.Front()
+	firstElement = lruList.Front()
 	<-lisChan
 	if firstElement == delElement {
 		t.Fatalf("The element is the same as the first, its wrong")
@@ -359,11 +359,11 @@ func printList() {
 	fmt.Println("******************************************************************************")
 	fmt.Println("********************   LISTA                  ********************************")
 	fmt.Println("******************************************************************************")
-	f := lista.Front()
-	b := lista.Back()
+	f := lruList.Front()
+	b := lruList.Back()
 	fmt.Println("Frente: ", f)
 	fmt.Println("Back  : ", b)
-	e := lista.Front()
+	e := lruList.Front()
 
 	for e != nil {
 		n := e.Value.(*node)
@@ -378,7 +378,7 @@ func printList() {
 func Test_the_swap_functionality(t *testing.T) {
 
 	//Clean the list
-	lista = list.New()
+	lruList = list.New()
 
 	//printList()
 
@@ -399,7 +399,7 @@ func Test_the_swap_functionality(t *testing.T) {
 
 	//check the last element (should be the first)
 	lisChan <- 1
-	lastElement := lista.Back()
+	lastElement := lruList.Back()
 	<-lisChan
 
 	n := lastElement.Value.(*node)
@@ -429,7 +429,7 @@ func Test_the_swap_functionality(t *testing.T) {
 
 	//check the last element in the LRU (it should be the second, no the first)
 	lisChan <- 1
-	lastElement2 := lista.Back()
+	lastElement2 := lruList.Back()
 	<-lisChan
 
 	n = lastElement2.Value.(*node)
@@ -503,7 +503,7 @@ func Test_get_element_that_is_only_in_disk(t *testing.T) {
 		t.Fatalf("Element does not exist in memory")
 	}
 	lisChan <- 1
-	firstElement := lista.Front()
+	firstElement := lruList.Front()
 	<-lisChan
 	if firstElement == nil {
 		t.Fatalf("LRU element does not exists")

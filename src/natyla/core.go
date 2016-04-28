@@ -29,7 +29,7 @@ import (
 )
 
 //Create the list to support the LRU List
-var lista *list.List
+var lruList *list.List
 
 //Max byte in memory (Key + Data), today set to 100KB
 var maxMemBytes int64
@@ -41,7 +41,7 @@ var cacheNotFound = true
 //Channel to sync the List, map
 var lisChan chan int
 
-//Channel to sync the LRU purge
+//LRUChan to sync the LRU purge
 var LRUChan chan int
 
 //chennel to acces to the collection map
@@ -84,7 +84,7 @@ func init() {
 	runtime.GOMAXPROCS(coreNum)
 
 	//Create a new doble-linked list to act as LRU
-	lista = list.New()
+	lruList = list.New()
 
 	//Create the channels
 	lisChan = make(chan int, 1)
@@ -101,9 +101,7 @@ func init() {
 	fmt.Println("------------------------------------------------------------------")
 }
 
-/*
- * Create the server
- */
+// Start the webserver
 func Start() {
 	//Start the console
 	go console()
@@ -192,7 +190,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 		n := &node{m, false, false}
 
 		lisChan <- 1
-		elemento = lista.PushFront(n)
+		elemento = lruList.PushFront(n)
 		<-lisChan
 
 	} else {
@@ -366,11 +364,11 @@ func purgeLRU() {
 		//Print Message
 		fmt.Println(memBytes, " - ", maxMemBytes, "dif: ", memBytes-maxMemBytes)
 		fmt.Println("Max memory reached! swapping", memBytes)
-		fmt.Println("LRU Elements: ", lista.Len())
+		fmt.Println("LRU Elements: ", lruList.Len())
 
 		//Get the last element and remove it. Sync is not needed because nothing
 		//happens if the element is moved in the middle of this rutine, at last it will be removed
-		lastElement := lista.Back()
+		lastElement := lruList.Back()
 		if lastElement == nil {
 			fmt.Println("Empty LRU")
 			//unsync
@@ -404,7 +402,7 @@ func purgeLRU() {
 func moveFront(elemento *list.Element) {
 	//Move the element
 	lisChan <- 1
-	lista.MoveToFront(elemento)
+	lruList.MoveToFront(elemento)
 	<-lisChan
 	if enablePrint {
 		fmt.Println("LRU Updated")
@@ -500,7 +498,7 @@ func deleteElementFromLRU(elemento *list.Element) {
 	atomic.AddInt64(&memBytes, -int64(len(b)))
 
 	//Delete the element in the LRU List
-	lista.Remove(elemento)
+	lruList.Remove(elemento)
 
 	fmt.Println("Dec Bytes: ", len(b))
 

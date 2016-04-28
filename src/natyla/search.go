@@ -1,4 +1,4 @@
-//
+// Package natyla ...
 // Search Module
 //
 // Manage the search engine on Natyle

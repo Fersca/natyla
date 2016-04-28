@@ -55,11 +55,11 @@ func handleTCPConnection(conn net.Conn) {
 	for {
 
 		//Read from connection waiting for a command
-		cant, err := conn.Read(command)
+		cant, errRead := conn.Read(command)
 
 		fmt.Println("Command:", string(command))
 
-		if err == nil {
+		if errRead == nil {
 
 			//read the command and create the string
 			commandStr := string(command)
@@ -188,7 +188,7 @@ func handleTCPConnection(conn net.Conn) {
 			continue
 
 		} else {
-			fmt.Println("Error: ", err)
+			fmt.Println("Error: ", errRead)
 			continue
 		}
 	}

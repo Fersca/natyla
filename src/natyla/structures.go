@@ -1,4 +1,4 @@
-//
+// Package natyla ...
 // Structures Module
 //
 // Structures that Natyla uses internally
