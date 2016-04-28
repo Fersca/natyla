@@ -10,9 +10,7 @@ import (
 	"reflect"
 )
 
-/*
- * Search the jsons that has the key with the specified value
- */
+// Search the jsons that has the key with the specified value
 func search(col, key, value string) ([]byte, error) {
 
 	arr := make([]interface{}, 0)
@@ -43,6 +41,7 @@ func search(col, key, value string) ([]byte, error) {
 	return b, err
 }
 
+// Search for jsons with particular fields
 func advancedSearch(collection string, query map[string][]string) ([]byte, error) {
 	arr := make([]interface{}, 0)
 	cc := collections[collection]

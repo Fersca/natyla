@@ -14,9 +14,7 @@ import (
 	"strings"
 )
 
-/*
- * Save the Json to disk
- */
+// Save the Json to disk
 func saveJSONToDisk(createDir bool, col, id, valor string) {
 
 	if createDir {
@@ -29,16 +27,12 @@ func saveJSONToDisk(createDir bool, col, id, valor string) {
 	}
 }
 
-/*
- * Delete the Json from disk
- */
+// Delete the Json from disk
 func deleteJSONFromDisk(col, clave string) error {
 	return os.Remove(config["data_dir"].(string) + "/" + col + "/" + clave + ".json")
 }
 
-/*
- * Read the Json from disk
- */
+// Read the Json from disk
 func readJSONFromDisK(col, clave string) ([]byte, error) {
 	fmt.Println("Read from disk: ", col, " - ", clave)
 	content, err := ioutil.ReadFile(config["data_dir"].(string) + "/" + col + "/" + clave + ".json")
@@ -49,17 +43,13 @@ func readJSONFromDisK(col, clave string) ([]byte, error) {
 	return content, err
 }
 
-/*
- * Create the data directory
- */
+// Create the data directory
 func createDataDir() {
 	//create the data directory, if it already exist, do nothing
 	os.Mkdir(config["data_dir"].(string), 0777)
 }
 
-/*
- * Read the config file
- */
+// Read the config file
 func readConfig() {
 
 	//read the config file
@@ -81,9 +71,7 @@ func readConfig() {
 
 }
 
-/*
- * Read all files so they are cached.
- */
+// Read all files so they are cached.
 func readAllFromDisk() (nRead uint64) {
 	nRead = 0
 	//Walk through data directory.
@@ -119,9 +107,7 @@ func readAllFromDisk() (nRead uint64) {
 //Hold the html template
 var template []byte
 
-/*
- * Read pretty print html from disk
- */
+// Read pretty print html from disk
 func readPrettyTemplate() []byte {
 	if template != nil {
 		return template

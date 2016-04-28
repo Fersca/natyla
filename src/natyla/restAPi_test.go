@@ -12,9 +12,7 @@ import (
 	"time"
 )
 
-/*
-RETST API TESTS
-*/
+// RETST API TESTS
 
 //Test the init of the REST API and the telnet admin
 func Test_Start_REST_API_and_Telnet(t *testing.T) {

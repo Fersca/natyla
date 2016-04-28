@@ -1,19 +1,18 @@
-/*
- * Natyla - FullStack API/Cache/Store
- *
- * 2014 - Fernando Scasserra - twitter: @fersca.
- *
- * Natyla is a persistance cache system written in golang that performs in constant time.
- * It keeps a MAP to store the object internally, and a Double Linked list to purge the LRU elements.
- *
- * LRU updates are done in backgrounds gorutines.
- * LRU and MAP modifications are performed through channels in order to keep them synchronized.
- * Bytes stored are counted in order to limit the amount of memory used by the application.
- *
- * Core Module
- * Manage the internal Memory Access, LRU, concurrency and Swapping
- */
-
+// Package natyla ...
+// Natyla - FullStack API/Cache/Store
+//
+// 2014 - Fernando Scasserra - twitter: @fersca.
+//
+// Natyla is a persistance cache system written in golang that performs in constant time.
+// It keeps a MAP to store the object internally, and a Double Linked list to purge the LRU elements.
+//
+// LRU updates are done in backgrounds gorutines.
+// LRU and MAP modifications are performed through channels in order to keep them synchronized.
+// Bytes stored are counted in order to limit the amount of memory used by the application.
+//
+// Core Module
+// Manage the internal Memory Access, LRU, concurrency and Swapping
+//
 package natyla
 
 import (
@@ -56,9 +55,8 @@ var config map[string]interface{}
 
 const readWrite = "read-write"
 
-/*
- * Init the system variables
- */
+
+// Init the system variables
 func init() {
 
 	//Welcome Message
@@ -111,9 +109,7 @@ func Start() {
 
 }
 
-/*
- * Convert a Json string to a map
- */
+// Convert a Json string to a map
 func convertJSONToMap(valor string) (map[string]interface{}, error) {
 
 	//Create the Json element
@@ -157,9 +153,7 @@ func createToken(value string) ([]byte, error) {
 	return b, err
 }
 
-/*
- * Create the element in the collection
- */
+// Create the element in the collection
 func createElement(col string, id string, valor string, saveToDisk bool, deleted bool) (string, error) {
 
 	//create the list element
@@ -265,9 +259,7 @@ func createElement(col string, id string, valor string, saveToDisk bool, deleted
 	return id, nil
 }
 
-/*
- * Get the element from the Map and push the element to the first position of the LRU-List
- */
+// Get the element from the Map and push the element to the first position of the LRU-List
 func getElement(col string, id string) ([]byte, error) {
 
 	cc := collections[col]
@@ -338,9 +330,7 @@ func getElement(col string, id string) ([]byte, error) {
 
 }
 
-/*
- * Get the number of elements
- */
+// Get the number of elements
 func getElements(col string) ([]byte, error) {
 	cc := collections[col]
 	b, err := json.Marshal(len(cc.Mapa))
@@ -348,9 +338,7 @@ func getElements(col string) ([]byte, error) {
 	return b, err
 }
 
-/*
- * Purge the LRU List deleting the last element
- */
+// Purge the LRU List deleting the last element
 func purgeLRU() {
 
 	LRUChan <- 1
@@ -396,9 +384,7 @@ func purgeLRU() {
 	<-LRUChan
 }
 
-/*
- * Move the element to the front of the LRU, because it was readed or updated
- */
+// Move the element to the front of the LRU, because it was readed or updated
 func moveFront(elemento *list.Element) {
 	//Move the element
 	lisChan <- 1
@@ -409,9 +395,7 @@ func moveFront(elemento *list.Element) {
 	}
 }
 
-/*
- * Delete the element from the disk, and if its enable, cache the not-found
- */
+// Delete the element from the disk, and if its enable, cache the not-found
 func deleteElement(col string, clave string) bool {
 
 	//Get the element collection
@@ -483,9 +467,7 @@ func deleteElement(col string, clave string) bool {
 
 }
 
-/*
- * Delete the element from de LRU and decrement the counters
- */
+// Delete the element from de LRU and decrement the counters
 func deleteElementFromLRU(elemento *list.Element) {
 
 	//Decrement the byte counter, decrease the Key * 2 + Value

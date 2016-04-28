@@ -12,9 +12,7 @@ import (
 	"strings"
 )
 
-/*
- * Init for testing
- */
+// Create the webserver for the rest API
 func restAPI() {
 	//Create the webserver
 	http.Handle("/", http.HandlerFunc(processRequest))
@@ -26,9 +24,7 @@ func restAPI() {
 	}
 }
 
-/*
- * Process the commands recived from internet
- */
+// Process the commands recived from internet
 func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	//If favicon.ico then return nothing by now.... :TODO
@@ -198,9 +194,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 }
 
-/*
- * Verify token is needed and authenticate
- */
+// Verify token is needed and authenticate
 func authToken(token string) (string, string) {
 
 	if config["admin_token"] == nil || config["admin_token"] == "" || strings.ToLower(token) == strings.ToLower(config["admin_token"].(string)) {
@@ -224,9 +218,7 @@ func authToken(token string) (string, string) {
 
 }
 
-/*
- * Print the request information
- */
+// Print the request information
 func printRequest(req *http.Request) {
 
 	//Print request information
@@ -241,9 +233,7 @@ func printRequest(req *http.Request) {
 	}
 }
 
-/*
- * Render the json output based on the accept header
- */
+// Render the json output based on the accept header
 func render(element []byte, w http.ResponseWriter, req *http.Request) {
 
 	//Get the headers map
@@ -261,9 +251,7 @@ func render(element []byte, w http.ResponseWriter, req *http.Request) {
 
 }
 
-/*
- * Check if the request accept html as return type
- */
+// Check if the request accept html as return type
 func acceptHTML(req *http.Request) bool {
 
 	if req.Header["Accept"] != nil {
@@ -273,9 +261,7 @@ func acceptHTML(req *http.Request) bool {
 	return false
 }
 
-/*
- *Check is the slide contains a text
- */
+// Check is the slide contains a text
 func contains(s []string, e string) bool {
 
 	for _, a := range s {

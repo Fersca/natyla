@@ -1,10 +1,9 @@
-/*
- * Console Module
- *
- * Manage the Natyla administration form console
- *
- */
-
+// Package natyla ...
+// Console Module
+//
+// Manage the Natyla administration form console
+//
+//
 package natyla
 
 import (
@@ -14,9 +13,7 @@ import (
 	"strings"
 )
 
-/*
- * Start the command console
- */
+// Start the command console
 func console() {
 
 	ln, err := net.Listen("tcp", ":"+config["telnet_port"].(string))
@@ -42,9 +39,7 @@ func concat(old1, old2 []byte) []byte {
 	return newslice
 }
 
-/*
- * Process each HTTP connection
- */
+// Process each HTTP connection
 func handleTCPConnection(conn net.Conn) {
 
 	fmt.Println("Connection stablished")
@@ -194,9 +189,7 @@ func handleTCPConnection(conn net.Conn) {
 	}
 }
 
-/*
- * Help
- */
+// Help
 func showHelp() string {
 
 	help := "\n\n"
